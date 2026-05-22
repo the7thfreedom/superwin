@@ -1,0 +1,146 @@
+$ bun run dev
+$ cross-env NODE_ENV=development bun run clean:dev && bun run generate:icons && cross-env NODE_ENV=development bun run scripts/clean-launch-services.ts && cross-env NODE_ENV=development bun run scripts/patch-dev-protocol.ts
+$ rimraf ./node_modules/.dev
+$ bun run scripts/generate-file-icons.ts
+Generated file icons: 1067 SVGs copied, 2046 file names, 1152 extensions, 4528 folder names
+[patch-dev-protocol] Skipping - not macOS
+$ cross-env NODE_ENV=development NODE_OPTIONS=--max-old-space-size=8192 electron-vite dev --watch
+[36mvite v7.3.2 [32mbuilding ssr environment for development...[36m[39m
+[36m
+watching for file changes...[39m
+[36m
+build started...[39m
+transforming...
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useQueries.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useQuery.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/QueryClientProvider.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/HydrationBoundary.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useIsFetching.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useIsFetching.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/QueryErrorResetBoundary.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useMutation.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useMutation.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useMutationState.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useMutationState.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/IsRestoringProvider.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useInfiniteQuery.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQuery.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseInfiniteQuery.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useSuspenseQueries.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/errorBoundaryUtils.js" was ignored.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useBaseQuery.js (1:0): Error when using sourcemap for reporting an error: Can't resolve original location of error.
+node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useBaseQuery.js (1:0): Module level directives cause errors when bundled, "use client" in "node_modules/.bun/@tanstack+react-query@5.100.9+2f44e903108183df/node_modules/@tanstack/react-query/build/modern/useBaseQuery.js" was ignored.
+[32mΓ£ô[39m 3673 modules transformed.
+node_modules/.bun/gray-matter@4.0.3/node_modules/gray-matter/lib/engines.js (43:13): Use of eval in "node_modules/.bun/gray-matter@4.0.3/node_modules/gray-matter/lib/engines.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[2mdist/main/[22m[36mchunks/index-BgjHiyD6.js                          [39m[1m[2m    0.57 kB[22m[1m[22m[2m Γöé map:      1.11 kB[22m
+[2mdist/main/[22m[36mchunks/fga-check-EQTZRPMD-CzwwqlRn.js             [39m[1m[2m    0.88 kB[22m[1m[22m[2m Γöé map:      1.70 kB[22m
+[2mdist/main/[22m[36mchunks/mastra-Z4U4R7NL-Bt3dc75n.js                [39m[1m[2m    1.06 kB[22m[1m[22m[2m Γöé map:      0.15 kB[22m
+[2mdist/main/[22m[36mchunks/netlify-WJWB3I3K-Khcdg52L.js               [39m[1m[2m    1.06 kB[22m[1m[22m[2m Γöé map:      0.15 kB[22m
+[2mdist/main/[22m[36mchunks/models-dev-75U75WLH-rw0Zfaz-.js            [39m[1m[2m    1.07 kB[22m[1m[22m[2m Γöé map:      0.15 kB[22m
+[2mdist/main/[22m[36mchunks/_commonjsHelpers-D-4Fx4X-.js               [39m[1m[2m    1.34 kB[22m[1m[22m[2m Γöé map:      0.15 kB[22m
+[2mdist/main/[22m[36mchunks/constants-XEHPYRDJ-B3F1G1Xr.js             [39m[1m[2m    1.42 kB[22m[1m[22m[2m Γöé map:      0.16 kB[22m
+[2mdist/main/[22m[36mchunks/shell-ready-scanner-zUI1tYUh.js            [39m[1m[2m    1.67 kB[22m[1m[22m[2m Γöé map:      4.67 kB[22m
+[2mdist/main/[22m[36mchunks/observational-memory-NL7AQHZV-C6cmNY8u.js  [39m[1m[2m    2.50 kB[22m[1m[22m[2m Γöé map:      0.18 kB[22m
+[2mdist/main/[22m[36mchunks/package-ogaaXZU2.js                        [39m[1m[2m    2.56 kB[22m[1m[22m[2m Γöé map:      7.53 kB[22m
+[2mdist/main/[22m[36mchunks/index-CKE3y2IG.js                          [39m[1m[2m    3.42 kB[22m[1m[22m[2m Γöé map:      5.58 kB[22m
+[2mdist/main/[22m[36mchunks/process-tree-BC8HnkUR.js                   [39m[1m[2m    3.74 kB[22m[1m[22m[2m Γöé map:      8.23 kB[22m
+[2mdist/main/[22m[36mchunks/pty-subprocess-ipc-CaxK3jNh.js             [39m[1m[2m    3.76 kB[22m[1m[22m[2m Γöé map:      6.23 kB[22m
+[2mdist/main/[22m[36mchunks/index-DzjFTh2o.js                          [39m[1m[2m    3.79 kB[22m[1m[22m[2m Γöé map:     10.73 kB[22m
+[2mdist/main/[22m[36mchunks/registry-generator-QMLHG25G-DdNi3sft.js    [39m[1m[2m    4.55 kB[22m[1m[22m[2m Γöé map:      7.14 kB[22m
+[2mdist/main/[22m[36mchunks/index-BsjqRWyA.js                          [39m[1m[2m    7.14 kB[22m[1m[22m[2m Γöé map:     12.53 kB[22m
+[2mdist/main/[22m[36mgit-task-worker.js                                [39m[1m[2m    8.22 kB[22m[1m[22m[2m Γöé map:     17.28 kB[22m
+[2mdist/main/[22m[36mpty-subprocess.js                                 [39m[1m[2m   11.33 kB[22m[1m[22m[2m Γöé map:     23.68 kB[22m
+[2mdist/main/[22m[36mchunks/tree-kill-BQhVKi9q.js                      [39m[1m[2m   26.21 kB[22m[1m[22m[2m Γöé map:     62.45 kB[22m
+[2mdist/main/[22m[36mpty-daemon.js                                     [39m[1m[2m   32.62 kB[22m[1m[22m[2m Γöé map:     81.81 kB[22m
+[2mdist/main/[22m[36mchunks/index-CtEczIvY.js                          [39m[1m[2m   37.73 kB[22m[1m[22m[2m Γöé map:     93.29 kB[22m
+[2mdist/main/[22m[36mchunks/safer-BNcyUNV2.js                          [39m[1m[2m   53.97 kB[22m[1m[22m[2m Γöé map:     86.52 kB[22m
+[2mdist/main/[22m[36mchunks/parse-status-CAkiIEt8.js                   [39m[1m[2m  118.61 kB[22m[1m[22m[2m Γöé map:    227.66 kB[22m
+[2mdist/main/[22m[36mchunks/index-CKr_CfER.js                          [39m[1m[2m  213.25 kB[22m[1m[22m[2m Γöé map:    307.33 kB[22m
+[2mdist/main/[22m[36mchunks/app-environment-BYEoSvgF.js                [39m[1m[2m  234.72 kB[22m[1m[22m[2m Γöé map:    448.27 kB[22m
+[2mdist/main/[22m[36mterminal-host.js                                  [39m[1m[2m  323.72 kB[22m[1m[22m[2m Γöé map:    520.41 kB[22m
+[2mdist/main/[22m[36mchunks/index-OCRnMrp1.js                          [39m[1m[2m  468.05 kB[22m[1m[22m[2m Γöé map:    472.78 kB[22m
+[2mdist/main/[22m[36mhost-service.js                                   [39m[1m[33m  863.98 kB[39m[22m[2m Γöé map:  1,776.96 kB[22m
+[2mdist/main/[22m[36mchunks/index--T158ZGk.js                          [39m[1m[33m1,003.59 kB[39m[22m[2m Γöé map:  2,210.51 kB[22m
+[2mdist/main/[22m[36mindex.js                                          [39m[1m[33m3,944.74 kB[39m[22m[2m Γöé map:  7,830.69 kB[22m
+[2mdist/main/[22m[36mchunks/get-small-model-DzV4dV2P.js                [39m[1m[33m8,065.35 kB[39m[22m[2m Γöé map: 14,235.28 kB[22m
+[36mbuilt in 27750ms.[39m
+[32m
+build the electron main process successfully[39m
+[90m
+-----
+[39m
+[36mvite v7.3.2 [32mbuilding ssr environment for development...[36m[39m
+[36m
+watching for file changes...[39m
+[36m
+build started...[39m
+transforming...
+[32mΓ£ô[39m 3 modules transformed.
+rendering chunks...
+[2mdist/preload/[22m[36mindex.js  [39m[1m[2m4.03 kB[22m[1m[22m
+[36mbuilt in 52ms.[39m
+[32m
+build the electron preload files successfully[39m
+[90m
+-----
+[39m
+[32mdev server running for the electron renderer process at:
+[39m
+  [32mΓ₧£[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+[2m  [32mΓ₧£[39m  [1mNetwork[22m[2m: use [22m[1m--host[22m[2m to expose[22m
+[32m
+start electron app...
+[39m
+
+[local-db] Database initialized at: C:\Users\yanhu\.superset\local.db
+[local-db] Running migrations from: Q:\Repos\superset\packages\local-db\drizzle
+[local-db] Migrations complete
+[main] Local database ready: true
+App state initialized at: C:\Users\yanhu\.superset\app-state.json
+[network-logger] recording to C:\Users\yanhu\AppData\Roaming\Superset\network-logs\current.json
+[main] Browser extension loaded
+[DaemonTerminalManager] Failed to reconcile sessions: Error: Existing terminal daemon probe failed while a socket path was present
+    at TerminalHostClient.tryConnectAndAuthenticate (Q:\Repos\superset\dist\main\index.js:43342:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async TerminalHostClient.listSessionsIfRunning (Q:\Repos\superset\dist\main\index.js:43356:23)
+    at async DaemonTerminalManager.listExistingDaemonSessions (Q:\Repos\superset\dist\main\index.js:45185:23)
+    at async DaemonTerminalManager.reconcileOnStartup (Q:\Repos\superset\dist\main\index.js:45190:25)
+    at async reconcileDaemonSessions (Q:\Repos\superset\dist\main\index.js:45946:5)
+    at async Q:\Repos\superset\dist\main\index.js:105870:5
+[agent-setup] Initializing agent hooks...
+[agent-setup] Verified notify hook
+[agent-setup] Verified Amp lifecycle plugin
+[agent-setup] Verified amp wrapper
+[agent-setup] Verified Claude settings.json
+[agent-setup] Verified claude wrapper
+[agent-setup] Verified Codex hooks.json
+[agent-setup] Verified codex wrapper
+[agent-setup] Verified droid wrapper
+[agent-setup] Verified Droid settings.json
+[agent-setup] Verified OpenCode plugin
+[agent-setup] Verified opencode wrapper
+[agent-setup] Verified pi extension
+[agent-setup] Verified Cursor hook script
+[agent-setup] Verified cursor-agent wrapper
+[agent-setup] Verified Cursor hooks.json
+[agent-setup] Verified Gemini hook script
+[agent-setup] Verified gemini wrapper
+[agent-setup] Verified Gemini settings.json
+[agent-setup] Verified mastracode wrapper
+[agent-setup] Verified Mastra hooks.json
+[agent-setup] Verified Copilot hook script
+[agent-setup] Verified copilot wrapper
+[agent-setup] shell integration mode=native shell=zsh
+[agent-setup] Verified zsh wrapper files
+[agent-setup] shell integration mode=native shell=bash
+[agent-setup] Verified bash wrapper
+[agent-setup] Agent hooks initialized
+[bundled-cli] No bundled CLI binary found
+[main] React DevTools extension not found. Install it in Chrome, or set ELECTRON_REACT_DEVTOOLS_PATH.
+[window-loader] Loading development URL: http://localhost:5173/#/
+[notifications] Listening on http://127.0.0.1:51741
+(electron) 'console-message' arguments are deprecated and will be removed. Please use Event<WebContentsConsoleMessageEventParams> object instead.
+[window-loader] Successfully loaded: http://localhost:5173/#/workspace
+[main-window] Renderer loaded successfully
+16:44:03.423 > [renderer-console] Access to fetch at 'https://api.superset.sh/api/auth/get-session' from origin 'http://localhost:5173' has been blocked by CORS policy: The 'Access-Control-Allow-Origin' header contains the invalid value ''. Have the server send the header with a valid value. (http://localhost:5173/#/workspace:0)

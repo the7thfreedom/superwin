@@ -1,0 +1,13 @@
+[install]
+linker = "isolated" # Prevent hoisting from resolving `path-scurry@2` to `lru-cache@6` (missing `LRUCache`), which breaks the `@superset/desktop` postinstall native rebuild.
+exact = true
+minimumReleaseAge = 259200
+
+[test]
+# Preload test setup. xterm-env-polyfill: @xterm/headless 6.x references `window` at module load, which throws in Bun (its navigator.userAgent causes xterm's isNode check to return false).
+preload = ["./src/main/terminal-host/xterm-env-polyfill.ts", "./test-setup.ts"]
+
+[test.env]
+NODE_ENV = "test"
+SKIP_ENV_VALIDATION = "1"
+

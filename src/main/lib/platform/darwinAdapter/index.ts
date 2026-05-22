@@ -1,0 +1,1 @@
+export { darwinAdapter } from "./darwinAdapter";

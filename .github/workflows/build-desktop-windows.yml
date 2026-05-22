@@ -1,0 +1,110 @@
+name: Build Desktop - Windows (soft-fail)
+
+# Smoke-build job that verifies the desktop app at least compiles on Windows.
+# This is intentionally soft-fail (continue-on-error) during the Windows
+# adaptation effort tracked in
+# plans/20260519-1430-windows-platform-support.md (M0).
+#
+# Once Milestones 1-7 land, this job will be promoted to a required check and
+# merged into build-desktop.yml proper.
+
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - "src/**"
+      - "packages/**"
+      - "tooling/**"
+      - ".github/workflows/build-desktop-windows.yml"
+      - "package.json"
+      - "bun.lock"
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build - Windows (x64) [soft-fail]
+    runs-on: windows-latest
+    continue-on-error: true
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Enable long-path support
+        # Required so worktree paths like
+        # %USERPROFILE%\.superset\worktrees\<project>\<long-branch-name>
+        # don't blow past MAX_PATH (260 chars) at install/test time.
+        shell: pwsh
+        run: |
+          Set-ItemProperty `
+            -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
+            -Name "LongPathsEnabled" `
+            -Value 1 `
+            -Type DWord
+          git config --system core.longpaths true
+
+      - name: Setup Bun
+        id: setup-bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .bun-version
+
+      - name: Cache dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-
+
+      - name: Install dependencies
+        run: bun install --frozen --ignore-scripts
+
+      - name: Install desktop native dependencies
+        run: bun run install:deps
+
+      - name: Typecheck
+        run: bun run typecheck
+
+      - name: Lint (root)
+        run: bun run lint
+
+      - name: Generate file icons
+        run: bun run generate:icons
+
+      - name: Compile app with electron-vite
+        env:
+          # Use placeholder values for soft-fail compile; the goal of this job
+          # is to validate the build pipeline on Windows, not to ship a usable
+          # artifact. Real secrets are injected only in the release pipeline
+          # (M10).
+          NEXT_PUBLIC_POSTHOG_KEY: ""
+          NEXT_PUBLIC_POSTHOG_HOST: ""
+          GOOGLE_CLIENT_ID: ""
+          GH_CLIENT_ID: ""
+          NEXT_PUBLIC_WEB_URL: ""
+          NEXT_PUBLIC_API_URL: ""
+          NEXT_PUBLIC_DOCS_URL: ""
+          NEXT_PUBLIC_STREAMS_URL: ""
+          NEXT_PUBLIC_ELECTRIC_URL: ""
+          SENTRY_DSN_DESKTOP: ""
+          SUPERSET_WORKSPACE_NAME: superset
+          TARGET_ARCH: x64
+        run: bun run compile:app
+
+      - name: Package (unsigned, --dir only)
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          TARGET_ARCH: x64
+        run: bunx electron-builder --win --x64 --dir --publish never --config electron-builder.ts
+
+      - name: Upload unsigned dir artifact
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-windows-x64-unpacked
+          path: release/win-unpacked/**
+          retention-days: 7
+          if-no-files-found: warn
