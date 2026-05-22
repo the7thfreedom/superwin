@@ -54,5 +54,31 @@ if (process.env.CI) {
 }
 
 // 3. Rebuild desktop native dependencies.
+//
+// On Windows, some optional native modules (e.g. `native-keymap`) require the
+// MSVC Spectre-mitigated libraries to rebuild. Rather than forcing every
+// Windows contributor to install that VS component, we treat `install:deps`
+// failures as non-fatal here and emit a clear warning. Modules with graceful
+// runtime fallbacks (keyboardLayout, etc.) will degrade silently; others will
+// surface a clear `require()` error at launch and can be fixed by re-running
+// `bun run install:deps` once the toolchain is available.
+//
+// Set `SUPERSET_STRICT_NATIVE_REBUILD=1` to restore the old fail-fast behaviour
+// (used in release pipelines).
 const installDepsStatus = run("bun", ["run", "install:deps"]);
-process.exit(installDepsStatus);
+if (installDepsStatus !== 0) {
+	if (process.env.SUPERSET_STRICT_NATIVE_REBUILD) {
+		process.exit(installDepsStatus);
+	}
+	console.warn(
+		"\n[postinstall] WARNING: `install:deps` exited with code " +
+			`${installDepsStatus}. One or more native modules failed to rebuild ` +
+			"against the local Electron ABI. The install will continue, but " +
+			"affected modules may not work until rebuilt manually.\n" +
+			"  - On Windows, this is most commonly the MSVC Spectre-mitigated " +
+			"libraries (Visual Studio Installer > Individual components).\n" +
+			"  - Re-run `bun run install:deps` after fixing the toolchain.\n" +
+			"  - Set SUPERSET_STRICT_NATIVE_REBUILD=1 to make this fatal.\n",
+	);
+}
+process.exit(0);
