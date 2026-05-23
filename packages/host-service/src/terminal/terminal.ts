@@ -35,8 +35,10 @@ import {
 	getTerminalBaseEnv,
 	resolveLaunchShell,
 } from "./env.ts";
-import { revokeSessionsForTerminal } from "./resource-sessions.ts";
-import { listTerminalResourceSessions } from "./resource-sessions.ts";
+import {
+	listTerminalResourceSessions,
+	revokeSessionsForTerminal,
+} from "./resource-sessions.ts";
 import {
 	createModeTracker,
 	type ModeTracker,

@@ -9,4 +9,5 @@ export const usePaywall: any = (): any => ({
 	openPaywall: () => {},
 });
 
-export const Paywall = ({ children }: { children?: ReactNode }) => children as any;
+export const Paywall = ({ children }: { children?: ReactNode }) =>
+	children as any;

@@ -4,9 +4,7 @@ export type {
 	ClientMessage as EventBusClientMessage,
 	ServerMessage as EventBusServerMessage,
 } from "./events";
-export {
-	LocalGitCredentialProvider,
-} from "./providers/git";
+export { LocalGitCredentialProvider } from "./providers/git";
 export type { ModelProviderRuntimeResolver } from "./providers/model-providers";
 export { LocalModelProvider } from "./providers/model-providers";
 export type { GitCredentialProvider, GitFactory } from "./runtime/git";

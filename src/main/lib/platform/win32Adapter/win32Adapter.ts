@@ -24,11 +24,7 @@
  * This adapter targets Windows 10 1809+ / Windows 11 on x64 and arm64.
  */
 
-import {
-	type ChildProcess,
-	execFile,
-	spawn,
-} from "node:child_process";
+import { type ChildProcess, execFile, spawn } from "node:child_process";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { SUPERSET_DIR_NAME } from "shared/constants";
@@ -44,7 +40,7 @@ import type {
 // Constants
 // ----------------------------------------------------------------------------
 
-const SUPERSET_HOME_DIR = join(homedir(), SUPERSET_DIR_NAME);
+const _SUPERSET_HOME_DIR = join(homedir(), SUPERSET_DIR_NAME);
 
 /** Named-pipe prefix mandated by Windows. */
 const PIPE_PREFIX = "\\\\.\\pipe\\";
@@ -82,7 +78,9 @@ export async function resolveWindowsExecutable(
 
 	const dirs = PATH.split(";").filter(Boolean);
 	const hasExt = path.extname(name).length > 0;
-	const candidates = hasExt ? [name] : [name, ...PATHEXT.map((ext) => name + ext)];
+	const candidates = hasExt
+		? [name]
+		: [name, ...PATHEXT.map((ext) => name + ext)];
 
 	for (const dir of dirs) {
 		for (const candidate of candidates) {
@@ -224,8 +222,7 @@ export const win32Adapter: PlatformAdapter = {
 				if (err) {
 					// taskkill exits with 128 when the process is already gone;
 					// treat that as success.
-					const code = (err as NodeJS.ErrnoException & { code?: number })
-						.code;
+					const code = (err as NodeJS.ErrnoException & { code?: number }).code;
 					if (code === 128) {
 						resolve({ success: true });
 						return;
@@ -267,8 +264,7 @@ export const win32Adapter: PlatformAdapter = {
 		// alive; the renderer/main process owns the cancellation policy via
 		// the returned ChildProcess handle.
 		const escapedPath = soundPath.replace(/'/g, "''");
-		const script =
-			`(New-Object Media.SoundPlayer '${escapedPath}').PlaySync()`;
+		const script = `(New-Object Media.SoundPlayer '${escapedPath}').PlaySync()`;
 		const child = spawn(
 			"powershell.exe",
 			["-NoLogo", "-NoProfile", "-NonInteractive", "-Command", script],
@@ -285,7 +281,11 @@ export const win32Adapter: PlatformAdapter = {
 	},
 
 	// CLI shim -----------------------------------------------------------
-	async generateCliShim({ name, shimDir, targetBinary }): Promise<CliShimResult> {
+	async generateCliShim({
+		name,
+		shimDir,
+		targetBinary,
+	}): Promise<CliShimResult> {
 		const fs = await import("node:fs/promises");
 		const path = await import("node:path");
 		await fs.mkdir(shimDir, { recursive: true });

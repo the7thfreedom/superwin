@@ -16,11 +16,9 @@ import { treeKillAsync } from "../../tree-kill";
 import type {
 	CliShimResult,
 	DefaultShellSpec,
-	IpcEndpoint,
 	IpcEndpointName,
 	KillTreeResult,
 	PlatformAdapter,
-	TreeKillSignal,
 } from "../types";
 
 const SUPERSET_HOME_DIR = join(homedir(), SUPERSET_DIR_NAME);
@@ -94,10 +92,8 @@ export const darwinAdapter: PlatformAdapter = {
 	// System -------------------------------------------------------------
 	playSound(soundPath, volume, callbacks): ChildProcess | null {
 		const volumeDecimal = volume / 100;
-		return execFile(
-			"afplay",
-			["-v", volumeDecimal.toString(), soundPath],
-			() => callbacks?.onComplete?.(),
+		return execFile("afplay", ["-v", volumeDecimal.toString(), soundPath], () =>
+			callbacks?.onComplete?.(),
 		);
 	},
 
@@ -110,7 +106,11 @@ export const darwinAdapter: PlatformAdapter = {
 	},
 
 	// CLI shim -----------------------------------------------------------
-	async generateCliShim({ name, shimDir, targetBinary }): Promise<CliShimResult> {
+	async generateCliShim({
+		name,
+		shimDir,
+		targetBinary,
+	}): Promise<CliShimResult> {
 		const fs = await import("node:fs/promises");
 		const path = await import("node:path");
 		const shimPath = path.join(shimDir, name);
@@ -137,7 +137,9 @@ async function resolveOnPath(
 	const PATH = process.env.PATH ?? "";
 	const sep = process.platform === "win32" ? ";" : ":";
 	const dirs = PATH.split(sep).filter(Boolean);
-	const candidates = pathext ? [name, ...pathext.map((ext) => name + ext)] : [name];
+	const candidates = pathext
+		? [name, ...pathext.map((ext) => name + ext)]
+		: [name];
 	for (const dir of dirs) {
 		for (const candidate of candidates) {
 			const full = path.join(dir, candidate);

@@ -7,7 +7,7 @@
  * `packages/host-service/src/runtime/git/simple-git.ts`.
  */
 
-import { runRules, repoRoot, type Rule } from "./lint-helpers";
+import { type Rule, repoRoot, runRules } from "./lint-helpers";
 
 const COMMON_EXCLUDES = [
 	"**/*.test.ts",

@@ -166,7 +166,7 @@ export type AgentRunResult =
 const SUPERSET_AGENT_ID = "superset";
 const SUPERSET_AGENT_LABEL = "Superset";
 
-async function resolveAttachmentsAsFiles(
+async function _resolveAttachmentsAsFiles(
 	attachmentIds: string[],
 ): Promise<Array<{ data: string; mediaType: string; filename?: string }>> {
 	return attachmentIds.map((attachmentId) => {

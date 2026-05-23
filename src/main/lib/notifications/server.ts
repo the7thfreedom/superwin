@@ -1,5 +1,4 @@
 import { EventEmitter } from "node:events";
-import { BrowserWindow } from "electron";
 import express from "express";
 import { NOTIFICATION_EVENTS } from "shared/constants";
 import { env } from "shared/env.shared";

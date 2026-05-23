@@ -30,13 +30,12 @@ const emptySessionState = {
 // hook result or a no-op async function. Allows wide variety of
 // `authClient.x.y()` call sites to still compile after the real client is removed.
 function makeStub(): any {
-	const target: any = function () {
-		return emptySessionState;
-	};
+	const target: any = () => emptySessionState;
 	return new Proxy(target, {
 		get(_t, prop) {
 			if (prop === "useSession") return () => emptySessionState;
-			if (prop === "getSession") return async () => ({ data: null, error: null });
+			if (prop === "getSession")
+				return async () => ({ data: null, error: null });
 			if (prop === "$Infer") return {};
 			return makeStub();
 		},

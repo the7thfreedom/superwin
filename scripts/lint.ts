@@ -16,7 +16,10 @@ const BIOME_VERSION = "2.4.2";
 const REPO_ROOT = resolve(import.meta.dir, "..");
 const isWindows = process.platform === "win32";
 
-function run(command: string, args: string[]): { code: number; output: string } {
+function run(
+	command: string,
+	args: string[],
+): { code: number; output: string } {
 	const result = spawnSync(command, args, {
 		cwd: REPO_ROOT,
 		encoding: "utf8",

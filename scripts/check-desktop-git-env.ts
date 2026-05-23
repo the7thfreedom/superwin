@@ -6,7 +6,7 @@
  * approved wrapper. See AGENTS.md and the original bash script for context.
  */
 
-import { runRules, repoRoot, type Rule } from "./lint-helpers";
+import { type Rule, repoRoot, runRules } from "./lint-helpers";
 
 const COMMON_EXCLUDE_TEST = "**/*.test.ts";
 const GIT_CLIENT_PATH = "src/lib/trpc/routers/workspaces/utils/git-client.ts";
@@ -37,7 +37,7 @@ const rules: Rule[] = [
 	},
 	{
 		message:
-			"[desktop-git-env] execWithShellEnv(\"git\", ...) is forbidden. " +
+			'[desktop-git-env] execWithShellEnv("git", ...) is forbidden. ' +
 			"Use execGitWithShellPath from workspaces/utils/git-client.ts.",
 		pattern: /\bexecWithShellEnv\(\s*['"]git['"]/,
 		include: ["src/**/*.ts", "src/**/*.tsx"],

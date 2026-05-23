@@ -11,4 +11,8 @@ export const useLocalHostService: any = (): any => ({
 	client: null,
 });
 
-export const LocalHostServiceProvider = ({ children }: { children?: ReactNode }) => children as any;
+export const LocalHostServiceProvider = ({
+	children,
+}: {
+	children?: ReactNode;
+}) => children as any;

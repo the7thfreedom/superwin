@@ -81,7 +81,8 @@ describe("darwinAdapter", () => {
 				const result = await darwinAdapter.generateCliShim({
 					name: "super",
 					shimDir: dir,
-					targetBinary: "/Applications/Superset.app/Contents/Resources/bin/super",
+					targetBinary:
+						"/Applications/Superset.app/Contents/Resources/bin/super",
 				});
 				expect(result.primaryPath).toBe(path.join(dir, "super"));
 				expect(result.writtenPaths).toEqual([result.primaryPath]);

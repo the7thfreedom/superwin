@@ -21,7 +21,6 @@ function selectAdapter(id: NodeJS.Platform): PlatformAdapter {
 			return darwinAdapter;
 		case "win32":
 			return win32Adapter;
-		case "linux":
 		default:
 			return linuxAdapter;
 	}
@@ -53,12 +52,13 @@ export function setPlatformForTesting(
 	};
 }
 
-export type { PlatformAdapter, PlatformId } from "./types";
 export type {
 	CliShimResult,
 	DefaultShellSpec,
 	IpcEndpoint,
 	IpcEndpointName,
 	KillTreeResult,
+	PlatformAdapter,
+	PlatformId,
 	TreeKillSignal,
 } from "./types";

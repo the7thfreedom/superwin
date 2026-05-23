@@ -4,7 +4,9 @@
 	"private": true,
 	"main": "index.js",
 	"types": "index.d.ts",
-	"os": ["darwin"],
+	"os": [
+		"darwin"
+	],
 	"scripts": {
 		"install": "node-gyp rebuild || echo 'Native build skipped (non-macOS or missing toolchain)'"
 	},

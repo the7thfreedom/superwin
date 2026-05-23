@@ -53,10 +53,7 @@ function getMigrationsDirectory(): string {
 
 	// Fallback: try monorepo path (for tests or dev without Electron)
 	// From dist/main -> packages/local-db/drizzle (root = app path)
-	const monorepoPath = join(
-		__dirname,
-		"../../packages/local-db/drizzle",
-	);
+	const monorepoPath = join(__dirname, "../../packages/local-db/drizzle");
 	if (existsSync(monorepoPath)) {
 		return monorepoPath;
 	}

@@ -12,7 +12,7 @@
  * from a refname string.
  */
 
-import { runRules, repoRoot, type Rule } from "./lint-helpers";
+import { type Rule, repoRoot, runRules } from "./lint-helpers";
 
 // V1 desktop tRPC routers (src/lib/trpc/routers/**) are out of scope for this
 // rule — see GIT_REFS.md "Open questions" for the v1 cleanup follow-up.

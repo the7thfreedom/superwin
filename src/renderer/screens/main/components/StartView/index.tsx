@@ -3,8 +3,8 @@ import { cn } from "@superset/ui/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { LuFolderOpen, LuPlus, LuX } from "react-icons/lu";
-import { useOpenProject } from "renderer/react-query/projects";
 import { SupersetLogo } from "renderer/components/SupersetLogo";
+import { useOpenProject } from "renderer/react-query/projects";
 
 export function StartView() {
 	const navigate = useNavigate();

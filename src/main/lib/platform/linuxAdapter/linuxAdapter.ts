@@ -128,7 +128,11 @@ export const linuxAdapter: PlatformAdapter = {
 		);
 	},
 
-	async generateCliShim({ name, shimDir, targetBinary }): Promise<CliShimResult> {
+	async generateCliShim({
+		name,
+		shimDir,
+		targetBinary,
+	}): Promise<CliShimResult> {
 		const fs = await import("node:fs/promises");
 		const path = await import("node:path");
 		const shimPath = path.join(shimDir, name);

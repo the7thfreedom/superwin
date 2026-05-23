@@ -73,4 +73,3 @@ export function listTerminalResourceSessions(
 export function revokeSessionsForTerminal(_terminalId: string): void {
 	// Cloud remote-control was removed; nothing to revoke locally.
 }
-
