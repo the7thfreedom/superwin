@@ -30,3 +30,19 @@ Imported full working tree from the local upstream fork (commit `0aedec34d` — 
 | Workflow cleanup | `.github/workflows/build-desktop.yml` (this commit) | Removed macOS-only build workflow. |
 
 Verified upstream: `bun run package --win --x64 --dir` produces `release/win-unpacked/Superset.exe` that launches on Windows with main window, local DB migrations, and renderer load.
+
+
+### 2026-05-23 — Post-import hardening
+
+| Area | Path(s) | What changed |
+|------|---------|--------------|
+| Native rebuild | `scripts/postinstall.ts`, `runtime-dependencies.ts` | Made `install:deps` failures non-fatal during `bun install` (warning + `SUPERSET_STRICT_NATIVE_REBUILD=1` opt-in for fail-fast); removed dead `@mastra/duckdb` entry left over from cloud-strip. |
+| Bash → TypeScript | `scripts/lint.ts`, `scripts/check-desktop-git-env.ts`, `scripts/check-git-ref-strings.ts`, `scripts/check-simple-git-usage.ts`, `scripts/lint-helpers.ts` | Ported four bash check scripts plus the lint wrapper to Bun/TS so the Windows port has no POSIX-shell or ripgrep runtime dependency. `scripts/postinstall.sh` deleted (already superseded by `scripts/postinstall.ts`). |
+| Lint auto-fix | repo-wide | Ran `bun run lint:fix` (biome `check --write --unsafe`): 3089 files fixed, 0 errors, 59 warnings (mostly `noExplicitAny` in cloud-strip stub modules — address separately). |
+| Flat node_modules | `scripts/copy-native-modules.ts` | `getWorkspaceRootNodeModulesDir` assumed the upstream monorepo layout (`apps/desktop/node_modules → ../../../node_modules`), which escapes the SuperWin repo entirely (`Q:\node_modules`) and broke transitive support-module resolution (`is-glob` not found). Now detects the flat layout via `.bun` sibling and returns the same directory. |
+| Cloud-strip dead refs | `src/renderer/stores/new-workspace-prompt-context/fetchers.ts` | `fetchPrBody` no longer calls `trpc.pullRequests.getContent.query` — that router was removed by the upstream cloud-strip. Returns `null` so callers fall through to their no-context path. |
+
+**Known open work** (not addressed in this session):
+
+- `bun run typecheck` reports ~597 errors after the post-import work above. Distribution: `TS2339` × 405 (mostly `Ref<WithVirtualProps>` losing inferred properties — likely stale generated types from the cloud-strip), `TS7006` × 78 (implicit any), `TS18046` × 43 (`unknown`), `TS2322` × 40 (incl. ~10 TanStack Router path literals like `/new-project` / `/tasks` / `/settings/account` whose route files were removed by the cloud-strip). Needs a dedicated cleanup pass.
+- Native modules requiring MSVC Spectre-mitigated libraries (`node-pty` rebuild) still fail without that VS component installed. Postinstall now emits a warning instead of blocking install; runtime `require()` will surface the failure if the module is actually loaded.

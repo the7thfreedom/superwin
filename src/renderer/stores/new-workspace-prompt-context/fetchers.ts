@@ -7,18 +7,12 @@ export async function fetchPrBody(args: {
 	projectId: string;
 	hostUrl: string;
 }): Promise<PromptContextBody | null> {
-	try {
-		const client = getHostServiceClientByUrl(args.hostUrl);
-		const result = await client.pullRequests.getContent.query({
-			projectId: args.projectId,
-			prNumber: args.prNumber,
-		});
-		const text = (result.body ?? "").trim();
-		return text ? { text } : null;
-	} catch (err) {
-		console.error("[promptContext] fetchPrBody failed", { args, err });
-		return null;
-	}
+	// SuperWin: the upstream cloud-strip removed the pullRequests tRPC router
+	// from the host service. PR-body fetching is currently unavailable in the
+	// local-only build. Return null so callers fall through to their no-context
+	// path; see windows-changes.md.
+	void args;
+	return null;
 }
 
 export async function fetchGitHubIssueBody(args: {
