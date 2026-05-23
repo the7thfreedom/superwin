@@ -35,6 +35,13 @@ const TARGET_ARCH = process.env.TARGET_ARCH || process.arch;
 const TARGET_PLATFORM = process.env.TARGET_PLATFORM || process.platform;
 
 function getWorkspaceRootNodeModulesDir(nodeModulesDir: string): string {
+	// SuperWin flat layout: the desktop app's node_modules IS the workspace
+	// root node_modules (it already contains the Bun store under .bun/).
+	if (existsSync(join(nodeModulesDir, ".bun"))) {
+		return nodeModulesDir;
+	}
+	// Legacy upstream monorepo layout: apps/desktop/node_modules →
+	// ../../../node_modules at the repo root.
 	return join(nodeModulesDir, "..", "..", "..", "node_modules");
 }
 
