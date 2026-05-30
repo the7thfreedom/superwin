@@ -218,6 +218,17 @@ export default defineConfig({
 		server: {
 			port: DEV_SERVER_PORT,
 			strictPort: false,
+			// Pre-transform the entry + root layout on dev-server start instead of
+			// lazily on the first window request. The renderer route tree is large
+			// (hundreds of files), so a cold first request otherwise blocks
+			// `did-finish-load` — and thus the window appearing — for several
+			// seconds. Warmup overlaps that compile with main-process startup.
+			warmup: {
+				clientFiles: [
+					resolve("src/renderer/index.tsx"),
+					resolve("src/renderer/routes/__root.tsx"),
+				],
+			},
 		},
 
 		plugins: [
