@@ -1,7 +1,7 @@
 import { execFile, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { statSync } from "node:fs";
-import { mkdir, rename } from "node:fs/promises";
+import { existsSync, statSync } from "node:fs";
+import { mkdir, rename, rm } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
 import type { BranchPrefixMode } from "@superset/local-db";
@@ -770,6 +770,11 @@ export async function removeWorktree(
 	mainRepoPath: string,
 	worktreePath: string,
 ): Promise<void> {
+	if (process.platform === "win32") {
+		await removeWorktreeWindows(mainRepoPath, worktreePath);
+		return;
+	}
+
 	try {
 		// Rename the worktree to a sibling temp dir (same filesystem to avoid EXDEV),
 		// then `git worktree prune` to clean metadata, then delete in background.
@@ -818,6 +823,79 @@ export async function removeWorktree(
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		console.error(`Failed to remove worktree: ${errorMessage}`);
 		throw new Error(`Failed to remove worktree: ${errorMessage}`);
+	}
+}
+
+/**
+ * Windows worktree removal.
+ *
+ * The POSIX path above renames the worktree to a temp dir and spawns
+ * `/bin/rm` in the background. Neither step is safe on Windows:
+ * - `rename()` throws EPERM/EACCES/EBUSY when any process still holds a
+ *   handle inside the worktree (a killed ConPTY/conhost releases its
+ *   handles lazily, so the directory is frequently still "busy" for a
+ *   short window after `terminal.killByWorkspaceId`). That error used to
+ *   propagate up as `{ success: false }`, which is exactly why a deleted
+ *   workspace flickered out and then reappeared.
+ * - `/bin/rm` does not exist on Windows.
+ *
+ * Instead we let git remove its own worktree (it understands the lock
+ * metadata) and then guarantee the directory is gone with `fs.rm`, whose
+ * `maxRetries`/`retryDelay` transparently retry on the transient
+ * EBUSY/EPERM/ENOTEMPTY that Windows raises while handles are released.
+ */
+async function removeWorktreeWindows(
+	mainRepoPath: string,
+	worktreePath: string,
+): Promise<void> {
+	if (!existsSync(worktreePath)) {
+		// Directory already gone — just reconcile git metadata.
+		try {
+			await execGitWithShellPath(["-C", mainRepoPath, "worktree", "prune"], {
+				timeout: 10_000,
+			});
+		} catch {}
+		return;
+	}
+
+	// Best effort: let git remove the worktree and its metadata.
+	try {
+		await execGitWithShellPath(
+			["-C", mainRepoPath, "worktree", "remove", "--force", worktreePath],
+			{ timeout: 30_000 },
+		);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.warn(
+			`[removeWorktree] git worktree remove failed on Windows, falling back to manual removal: ${message}`,
+		);
+	}
+
+	// Reconcile metadata regardless of whether the remove above succeeded.
+	try {
+		await execGitWithShellPath(["-C", mainRepoPath, "worktree", "prune"], {
+			timeout: 10_000,
+		});
+	} catch {}
+
+	// Ensure the directory is actually gone. fs.rm retries the transient
+	// Windows lock errors (EBUSY/EPERM/ENOTEMPTY) while handles drain.
+	if (existsSync(worktreePath)) {
+		try {
+			await rm(worktreePath, {
+				recursive: true,
+				force: true,
+				maxRetries: 10,
+				retryDelay: 200,
+			});
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			console.error(
+				`[removeWorktree] Failed to remove worktree directory ${worktreePath} on Windows: ${errorMessage}`,
+			);
+			throw new Error(`Failed to remove worktree: ${errorMessage}`);
+		}
 	}
 }
 
