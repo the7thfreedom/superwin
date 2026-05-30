@@ -1,25 +1,22 @@
 import { EventEmitter } from "node:events";
 
-// Layout-aware keyboard support (formerly backed by `native-keymap`) was
-// removed for SuperWin: it required a native module that needs MSVC
-// Spectre-mitigated libraries to rebuild on Windows, and the only benefit
-// was making shortcut labels follow non-US-ANSI layouts (Dvorak / AZERTY
-// / QWERTZ / German / ...). Shortcuts themselves still work on every
-// layout — they fall back to the static US-ANSI display in
-// `src/renderer/hotkeys/display.ts`.
+// Wraps native-keymap for the renderer (mirrors VSCode's
+// keyboardLayoutMainService). Lazy-loads on first read so the native module
+// only initializes when actually needed.
 //
-// This module is kept as a thin no-op so the tRPC router and renderer
-// store keep compiling without conditional imports. `getKeyboardLayoutSnapshot`
-// always returns EMPTY and `onKeyboardLayoutChange` is a no-op subscribe.
-// If layout-awareness is wanted back, restore the native-keymap wrapper
-// from git history (commit 5e7519d or earlier).
+// On Windows the native module must be rebuilt against Electron's ABI and
+// needs the MSVC Spectre-mitigated libraries to compile. If it is missing
+// or fails to load (e.g. a contributor without that VS component), every
+// entry point below degrades silently to EMPTY and the renderer falls back
+// to the static US-ANSI shortcut display in `src/renderer/hotkeys/display.ts`.
+// Shortcuts themselves keep working on every layout regardless.
 
 export interface KeyboardLayoutData {
 	/** OS-specific layout id, e.g. "com.apple.keylayout.German". Empty if unavailable. */
 	layoutId: string;
 	/** Localized human-readable name, e.g. "German". Empty if unavailable. */
 	layoutName: string;
-	/** Map<event.code, unshifted glyph>. Empty in SuperWin (no layout source). */
+	/** Map<event.code, unshifted glyph>. Phase 2 may extend with shifted/altgr layers. */
 	unshifted: Record<string, string>;
 }
 
@@ -30,16 +27,77 @@ const EMPTY: KeyboardLayoutData = {
 };
 
 const emitter = new EventEmitter();
+let cached: KeyboardLayoutData = EMPTY;
+let initialized = false;
 
-/** Current layout snapshot. Always EMPTY in SuperWin (renderer falls back to US-ANSI). */
-export function getKeyboardLayoutSnapshot(): KeyboardLayoutData {
-	return EMPTY;
+type NativeKeymapModule = typeof import("native-keymap");
+
+let nativeKeymap: NativeKeymapModule | null = null;
+
+function loadNative(): NativeKeymapModule | null {
+	if (nativeKeymap) return nativeKeymap;
+	try {
+		nativeKeymap = require("native-keymap") as NativeKeymapModule;
+		return nativeKeymap;
+	} catch (err) {
+		console.error("[keyboardLayout] failed to load native-keymap:", err);
+		return null;
+	}
 }
 
-/** No-op subscribe — layout never changes here. Returns an unsubscribe function. */
+function read(): KeyboardLayoutData {
+	const mod = loadNative();
+	if (!mod) return EMPTY;
+	try {
+		const info = mod.getCurrentKeyboardLayout() as {
+			id?: string;
+			name?: string;
+			localizedName?: string;
+			lang?: string;
+		} | null;
+		const map = mod.getKeyMap() as Record<string, { value?: string }>;
+		const unshifted: Record<string, string> = {};
+		for (const [code, entry] of Object.entries(map)) {
+			if (entry?.value) unshifted[code] = entry.value;
+		}
+		return {
+			layoutId: info?.id ?? info?.name ?? "",
+			layoutName: info?.localizedName ?? info?.name ?? "",
+			unshifted,
+		};
+	} catch (err) {
+		console.error("[keyboardLayout] read failed:", err);
+		return EMPTY;
+	}
+}
+
+function ensureInitialized(): void {
+	if (initialized) return;
+	initialized = true;
+	const mod = loadNative();
+	if (!mod) return;
+	cached = read();
+	try {
+		mod.onDidChangeKeyboardLayout(() => {
+			cached = read();
+			emitter.emit("change", cached);
+		});
+	} catch (err) {
+		console.error("[keyboardLayout] failed to register listener:", err);
+	}
+}
+
+/** Current layout snapshot. Initializes native-keymap on first call. */
+export function getKeyboardLayoutSnapshot(): KeyboardLayoutData {
+	ensureInitialized();
+	return cached;
+}
+
+/** Subscribe to layout changes. Returns an unsubscribe function. */
 export function onKeyboardLayoutChange(
 	cb: (data: KeyboardLayoutData) => void,
 ): () => void {
+	ensureInitialized();
 	emitter.on("change", cb);
 	return () => {
 		emitter.off("change", cb);

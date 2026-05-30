@@ -55,13 +55,13 @@ if (process.env.CI) {
 
 // 3. Rebuild desktop native dependencies.
 //
-// Native rebuilds on Windows can fail when the local MSVC toolchain is
-// missing components (e.g. Spectre-mitigated libraries). Rather than
-// blocking `bun install` for every contributor without that VS component,
-// we treat `install:deps` failures as non-fatal here and emit a clear
-// warning. Modules that fail to rebuild will surface a clear `require()`
-// error at launch and can be fixed by re-running `bun run install:deps`
-// once the toolchain is available.
+// On Windows, some optional native modules (e.g. `native-keymap`) require the
+// MSVC Spectre-mitigated libraries to rebuild. Rather than forcing every
+// Windows contributor to install that VS component, we treat `install:deps`
+// failures as non-fatal here and emit a clear warning. Modules with graceful
+// runtime fallbacks (keyboardLayout, etc.) will degrade silently; others will
+// surface a clear `require()` error at launch and can be fixed by re-running
+// `bun run install:deps` once the toolchain is available.
 //
 // Set `SUPERSET_STRICT_NATIVE_REBUILD=1` to restore the old fail-fast behaviour
 // (used in release pipelines).
