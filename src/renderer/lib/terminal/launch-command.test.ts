@@ -1,4 +1,5 @@
 import { describe, expect, it, mock } from "bun:test";
+import { PLATFORM } from "renderer/hotkeys";
 import {
 	buildTerminalCommand,
 	launchCommandInPane,
@@ -9,6 +10,10 @@ import {
 	markTerminalSessionReady,
 	rejectTerminalSessionReady,
 } from "./session-readiness";
+
+// A terminal Enter keypress is \r on Windows (ConPTY) and \n elsewhere — see
+// normalizeTerminalCommand in launch-command.ts.
+const SUBMIT = PLATFORM === "windows" ? "\r" : "\n";
 
 describe("launchCommandInPane", () => {
 	it("creates a terminal session and writes the command with a newline", async () => {
@@ -32,7 +37,7 @@ describe("launchCommandInPane", () => {
 		});
 		expect(write).toHaveBeenCalledWith({
 			paneId: "pane-1",
-			data: "echo hello\n",
+			data: `echo hello${SUBMIT}`,
 			throwOnError: true,
 		});
 	});
@@ -104,7 +109,7 @@ describe("launchCommandInPane", () => {
 
 		expect(write).toHaveBeenCalledWith({
 			paneId,
-			data: "echo hello\n",
+			data: `echo hello${SUBMIT}`,
 			throwOnError: true,
 		});
 	});
@@ -158,7 +163,7 @@ describe("writeCommandsInPane", () => {
 
 		expect(write).toHaveBeenCalledWith({
 			paneId: "pane-1",
-			data: "echo one && echo two\n",
+			data: `echo one && echo two${SUBMIT}`,
 			throwOnError: true,
 		});
 	});

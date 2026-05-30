@@ -1,3 +1,4 @@
+import { PLATFORM } from "renderer/hotkeys";
 import { waitForTerminalSessionReady } from "./session-readiness";
 
 interface TerminalCreateOrAttachInput {
@@ -31,7 +32,15 @@ interface LaunchCommandInPaneOptions {
 }
 
 function normalizeTerminalCommand(command: string): string {
-	return command.endsWith("\n") ? command : `${command}\n`;
+	// A terminal "Enter" keypress is a carriage return (\r) — that is what
+	// xterm.js sends on Enter. On Unix the tty line discipline (ICRNL) maps a
+	// bare \n to a line submit, so \n happens to work. Windows ConPTY has no
+	// such line discipline: a bare \n is inserted literally and the command is
+	// never executed (it sits waiting for the user to press Enter). Use \r on
+	// Windows so the launch command auto-executes like it does on macOS.
+	const submit = PLATFORM === "windows" ? "\r" : "\n";
+	if (command.endsWith("\r") || command.endsWith("\n")) return command;
+	return `${command}${submit}`;
 }
 
 interface WriteCommandInPaneOptions {
