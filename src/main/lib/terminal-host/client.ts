@@ -81,13 +81,22 @@ const SOCKET_PATH =
 		? `\\\\.\\pipe\\superset-terminal-host`
 		: join(SUPERSET_HOME_DIR, "terminal-host.sock");
 const TOKEN_PATH = join(SUPERSET_HOME_DIR, "terminal-host.token");
-/**
- * Windows named pipes have no filesystem entry, so `socketPathExists()`
- * always returns false. Use this helper at every "is the daemon up?" gate
- * so we let `connect()` make the decision instead of bailing early.
- */
 const IS_PIPE = process.platform === "win32";
-const socketPathExists = (): boolean => IS_PIPE || socketPathExists();
+/**
+ * Raw on-disk check for the daemon socket. Windows named pipes have no
+ * filesystem entry, so this is always false on Windows. Use only where the
+ * real question is "is there a stale daemon artifact?" (startup probe /
+ * cleanup decisions): on Windows a failed connect means there is no daemon,
+ * because the OS removes the pipe when the server process exits.
+ */
+const socketArtifactExists = (): boolean => existsSync(SOCKET_PATH);
+/**
+ * "Could the daemon endpoint be reachable?" gate. On Windows (named pipe)
+ * there is nothing to stat, so assume reachable and let `connect()` make the
+ * real decision instead of bailing early.
+ */
+const daemonEndpointMaybeReachable = (): boolean =>
+	IS_PIPE || socketArtifactExists();
 const PID_PATH = join(SUPERSET_HOME_DIR, "terminal-host.pid");
 const SPAWN_LOCK_PATH = join(SUPERSET_HOME_DIR, "terminal-host.spawn.lock");
 const SCRIPT_MTIME_PATH = join(SUPERSET_HOME_DIR, "terminal-host.mtime");
@@ -292,11 +301,11 @@ export class TerminalHostClient extends EventEmitter {
 		this.connectionState = ConnectionState.CONNECTING;
 
 		try {
-			const socketPathExisted = socketPathExists();
+			const socketArtifactExisted = socketArtifactExists();
 			const connected = await this.tryConnectControl();
 			if (!connected) {
 				this.resetConnectionState({ emitDisconnected: false });
-				if (!socketPathExisted && !socketPathExists()) {
+				if (!socketArtifactExisted && !socketArtifactExists()) {
 					return false;
 				}
 				throw new Error(
@@ -352,7 +361,7 @@ export class TerminalHostClient extends EventEmitter {
 			return true;
 		}
 
-		if (!socketPathExists()) {
+		if (!socketArtifactExists()) {
 			return false;
 		}
 
@@ -560,7 +569,7 @@ export class TerminalHostClient extends EventEmitter {
 
 	private async tryConnectControl(): Promise<boolean> {
 		return new Promise((resolve) => {
-			if (!socketPathExists()) {
+			if (!daemonEndpointMaybeReachable()) {
 				resolve(false);
 				return;
 			}
@@ -608,7 +617,7 @@ export class TerminalHostClient extends EventEmitter {
 
 	private async tryConnectStream(): Promise<boolean> {
 		return new Promise((resolve) => {
-			if (!socketPathExists()) {
+			if (!daemonEndpointMaybeReachable()) {
 				resolve(false);
 				return;
 			}
@@ -962,7 +971,7 @@ export class TerminalHostClient extends EventEmitter {
 	}: {
 		killSessions?: boolean;
 	} = {}): Promise<void> {
-		if (!socketPathExists()) return;
+		if (!daemonEndpointMaybeReachable()) return;
 
 		const token = this.readAuthToken();
 
@@ -1057,7 +1066,7 @@ export class TerminalHostClient extends EventEmitter {
 		const timeoutMs = 2000;
 
 		while (Date.now() - startTime < timeoutMs) {
-			if (!socketPathExists()) return;
+			if (!daemonEndpointMaybeReachable()) return;
 			const live = await this.isSocketLive();
 			if (!live) return;
 			await this.sleep(100);
@@ -1074,7 +1083,7 @@ export class TerminalHostClient extends EventEmitter {
 	 */
 	private isSocketLive(): Promise<boolean> {
 		return new Promise((resolve) => {
-			if (!socketPathExists()) {
+			if (!daemonEndpointMaybeReachable()) {
 				resolve(false);
 				return;
 			}
@@ -1156,7 +1165,7 @@ export class TerminalHostClient extends EventEmitter {
 	private async spawnDaemon(): Promise<void> {
 		// Check if socket is live first - this is the authoritative check
 		// PID file can be stale if daemon crashed and PID was reused by another process
-		if (socketPathExists()) {
+		if (daemonEndpointMaybeReachable()) {
 			const isLive = await this.isSocketLive();
 			if (isLive) {
 				if (DEBUG_CLIENT) {
@@ -1333,7 +1342,7 @@ export class TerminalHostClient extends EventEmitter {
 		const startTime = Date.now();
 
 		while (Date.now() - startTime < SPAWN_WAIT_MS) {
-			if (socketPathExists()) {
+			if (daemonEndpointMaybeReachable()) {
 				// Give it a moment to start listening
 				await this.sleep(200);
 				return;
