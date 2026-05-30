@@ -46,3 +46,21 @@ Verified upstream: `bun run package --win --x64 --dir` produces `release/win-unp
 
 - `bun run typecheck` reports ~597 errors after the post-import work above. Distribution: `TS2339` × 405 (mostly `Ref<WithVirtualProps>` losing inferred properties — likely stale generated types from the cloud-strip), `TS7006` × 78 (implicit any), `TS18046` × 43 (`unknown`), `TS2322` × 40 (incl. ~10 TanStack Router path literals like `/new-project` / `/tasks` / `/settings/account` whose route files were removed by the cloud-strip). Needs a dedicated cleanup pass.
 - Native modules requiring MSVC Spectre-mitigated libraries (`node-pty` rebuild) still fail without that VS component installed. Postinstall now emits a warning instead of blocking install; runtime `require()` will surface the failure if the module is actually loaded.
+
+
+### 2026-05-24 — Typecheck cleanup pass
+
+| Area | Path(s) | What changed |
+|------|---------|--------------|
+| Collection row types | `src/renderer/routes/_authenticated/providers/CollectionsProvider/index.ts` | The cloud-strip replaced the collections provider with `any`-typed stub collections. When `any`/`object`-typed rows flow through TanStack DB's `q.from().select()` query builder, the ref-proxy resolves to `Ref<WithVirtualProps<object>>` with no named properties, so every `.id`/`.title`/`.tabOrder`/etc. access failed with `TS2339`. Typed the stub rows with an **index-signature row** (`Record<string, any>`) so `keyof` includes `string \| number` and arbitrary field access resolves to `unknown` instead of erroring, and propagated the typed `Collection<CollectionRow>` through `makeCollection`/`buildCollections`/`useCollections` (previously erased to `any`). Eliminated ~393 errors. |
+| Chat service router | `packages/chat/src/server/desktop/index.ts` | Reconstructed `ChatServiceRouter` as a permissive tRPC router (`auth`/`workspace` sub-routers, loose `z.any()` inputs and `Record<string, any>` outputs, typed slash-command list). The renderer's `createTRPCReact<ChatServiceRouter>()` was resolving to the "router collides with built-in method" error union because the type was `any`. |
+| Host-service routers | `packages/host-service/src/trpc/router/stub-routers.ts`, `router.ts` | Added stub `auth` / `chat` / `pullRequests` sub-routers to the host-service `appRouter`. These were cloud-stripped but the renderer (`workspaceTrpc` and the per-host vanilla clients) still calls them (`chat.sendMessage`, `pullRequests.getByWorkspaces`, etc.). Loose inputs/outputs, with PR/slash-command shapes typed where consumers destructure. |
+
+Net result: `bun run typecheck` errors reduced **597 → 159** (-73%).
+
+**Remaining open work** (~159 errors, genuine cloud-strip feature debt):
+
+- **`TS2322` dead routes (~30)** — components still `<Link to="…">` / `navigate({ to })` to routes the cloud-strip removed (`/tasks`, `/tasks/$taskId`, `/automations`, `/new-project`, `/settings/account`, `/welcome`, `/setup/providers`). Fixing requires either re-adding stub route files (and regenerating `routeTree.gen.ts`) or removing the dead navigation — a product decision, not a mechanical fix.
+- **`Promise<string \| null>` vs `string` (~6)** — an auth-token getter became async; sync consumers need awaiting. Needs per-call-site review.
+- **`TS7006` / `TS18046` long tail (~45)** — implicit-`any` / `unknown` callback params (chat message `part`/`message`, immer `draft`, etc.) that are symptoms of upstream `any` from stripped message/snapshot types.
+- **Misc `TS2353` / `TS2345` / `TS2614` / `TS2739` (~40)** — in v2 workspace components (`V2PresetsSection`, `V2SessionsSection`, `ModelsSettings`, etc.), mostly downstream of the loose stub-router/collection shapes.
