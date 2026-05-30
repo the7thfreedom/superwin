@@ -12,6 +12,7 @@ import { notificationsRouter } from "./notifications";
 import { portsRouter } from "./ports";
 import { projectRouter } from "./project";
 import { settingsRouter } from "./settings";
+import { authRouter, chatRouter, pullRequestsRouter } from "./stub-routers";
 import { terminalRouter } from "./terminal";
 import { workspaceRouter } from "./workspace";
 import { workspaceCleanupRouter } from "./workspace-cleanup";
@@ -21,6 +22,8 @@ import { workspacesRouter } from "./workspaces";
 export const appRouter = router({
 	agents: agentsRouter,
 	attachments: attachmentsRouter,
+	auth: authRouter,
+	chat: chatRouter,
 	health: healthRouter,
 	host: hostRouter,
 	config: configRouter,
@@ -31,6 +34,7 @@ export const appRouter = router({
 	notifications: notificationsRouter,
 	project: projectRouter,
 	ports: portsRouter,
+	pullRequests: pullRequestsRouter,
 	settings: settingsRouter,
 	terminal: terminalRouter,
 	workspace: workspaceRouter,
