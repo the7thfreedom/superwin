@@ -173,7 +173,7 @@
 		"@xterm/addon-search": "0.17.0-beta.197",
 		"@xterm/addon-serialize": "0.15.0-beta.197",
 		"@xterm/addon-unicode11": "0.10.0-beta.197",
-		"@xterm/addon-webgl": "0.20.0-beta.196",
+		"@xterm/addon-webgl": "0.20.0-beta.255",
 		"@xterm/headless": "6.1.0-beta.197",
 		"@xterm/xterm": "6.1.0-beta.197",
 		"ai": "6.0.141",
