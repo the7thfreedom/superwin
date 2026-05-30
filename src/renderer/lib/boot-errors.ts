@@ -1,3 +1,5 @@
+import { dismissBootSplash } from "./boot-splash";
+
 let bootErrorReported = false;
 let hasMounted = false;
 let rootElement: Element | null = null;
@@ -6,6 +8,9 @@ let listenersAttached = false;
 const renderBootError = (message: string, error?: unknown) => {
 	if (bootErrorReported) return;
 	bootErrorReported = true;
+
+	// Remove the boot splash overlay so the error is not hidden behind it.
+	dismissBootSplash();
 
 	const container = rootElement ?? document.body;
 	const wrapper = document.createElement("div");

@@ -6,6 +6,7 @@ import { useFileOpenMode } from "renderer/hooks/useFileOpenMode";
 import { useHotkey } from "renderer/hotkeys";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
+import { dismissBootSplash } from "renderer/lib/boot-splash";
 import { usePresets } from "renderer/react-query/presets";
 import type { WorkspaceSearchParams } from "renderer/routes/_authenticated/_dashboard/utils/workspace-navigation";
 import { navigateToWorkspace } from "renderer/routes/_authenticated/_dashboard/utils/workspace-navigation";
@@ -84,6 +85,15 @@ function WorkspacePage() {
 	const { data: workspace } = electronTrpc.workspaces.get.useQuery({
 		id: workspaceId,
 	});
+	// Dismiss the boot splash once the worktree has real data to render (either
+	// the worktree UI or the initialization view). Until then the splash stays
+	// up, so the user never sees a blank/black window while the worktree route
+	// prepares to render.
+	useEffect(() => {
+		if (workspace) {
+			dismissBootSplash();
+		}
+	}, [workspace]);
 	useWorkspaceFileEventBridge(
 		workspaceId,
 		workspace?.worktreePath,
@@ -141,7 +151,6 @@ function WorkspacePage() {
 	// - Failed workspaces (shows error with retry)
 	// - Interrupted workspaces that aren't currently initializing (shows resume option)
 	const showInitView = isInitializing || hasFailed || hasIncompleteInit;
-
 	const allTabs = useTabsStore((s) => s.tabs);
 	const activeTabIdForWorkspace = useTabsStore(
 		(s) => s.activeTabIds[workspaceId] ?? null,

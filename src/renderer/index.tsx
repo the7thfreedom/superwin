@@ -12,11 +12,11 @@ import {
 	markBootMounted,
 	reportBootError,
 } from "./lib/boot-errors";
+import { scheduleBootSplashFallback } from "./lib/boot-splash";
 import { persistentHistory } from "./lib/persistent-hash-history";
 import { posthog } from "./lib/posthog";
 import { electronQueryClient } from "./providers/ElectronTRPCProvider";
 import { routeTree } from "./routeTree.gen";
-
 import "./globals.css";
 import "./styles/bundled-fonts.css";
 
@@ -78,4 +78,7 @@ if (!rootElement) {
 		</BootErrorBoundary>,
 	);
 	markBootMounted();
+	// Safety net: never let the boot splash get stuck on screen if no route ever
+	// signals ready. Routes dismiss it explicitly once their real UI renders.
+	scheduleBootSplashFallback(30000);
 }

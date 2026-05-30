@@ -293,21 +293,43 @@ export async function MainWindow() {
 		}, 0);
 	});
 
+	const revealWindow = () => {
+		if (hasCompletedFirstLoad || window.isDestroyed()) return;
+		if (initialBounds.isMaximized) {
+			window.maximize();
+		}
+		window.show();
+		initialized = true;
+		hasCompletedFirstLoad = true;
+	};
+
+	// Reveal the window as soon as the static boot splash (in index.html) has had
+	// a chance to paint, rather than waiting for a webContents load event.
+	//
+	// In dev, the renderer entry (`index.tsx`) is a deferred ES module that takes
+	// several seconds to compile on first load. Because `DOMContentLoaded`
+	// (`dom-ready`), `ready-to-show`, and `did-finish-load` all wait for deferred
+	// module scripts to finish, they ALL fire only after that ~7s compile — so
+	// gating `window.show()` on any of them keeps the window hidden the whole
+	// time and the loading screen is never seen. The static splash markup,
+	// however, is painted by Chromium during HTML parsing, long before the module
+	// resolves. So we reveal on a short timer (splash is on screen by then) and
+	// also on `did-finish-load` as a fallback — whichever fires first wins, since
+	// `revealWindow` is idempotent. In production the bundle loads fast, so
+	// `did-finish-load` fires well within the timer and reveals immediately.
+	const splashRevealTimer = setTimeout(revealWindow, 600);
+
 	window.webContents.on("did-finish-load", () => {
+		clearTimeout(splashRevealTimer);
 		console.log("[main-window] Renderer loaded successfully");
 
 		if (persistedZoomLevel !== undefined) {
 			window.webContents.setZoomLevel(persistedZoomLevel);
 		}
 
-		if (!hasCompletedFirstLoad) {
-			if (initialBounds.isMaximized) {
-				window.maximize();
-			}
-			window.show();
-			initialized = true;
-			hasCompletedFirstLoad = true;
-		}
+		// Fallback: ensure the window is shown even if `ready-to-show` never
+		// fired for some reason.
+		revealWindow();
 	});
 
 	window.webContents.on(

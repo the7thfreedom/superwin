@@ -1,7 +1,8 @@
 import "react-mosaic-component/react-mosaic-component.css";
 import "./mosaic-theme.css";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo } from "react";
+import { LuLoader } from "react-icons/lu";
 import {
 	Mosaic,
 	type MosaicBranch,
@@ -19,15 +20,40 @@ import {
 	getPaneIdSetForTab,
 } from "renderer/stores/tabs/utils";
 import { useTheme } from "renderer/stores/theme";
-import { BrowserPane } from "./BrowserPane";
-import { ChatPane } from "./ChatPane";
-import { CommentPane } from "./CommentPane";
 import { MosaicSplitOverlay } from "./components";
-import { DevToolsPane } from "./DevToolsPane";
-import { FileViewerPane } from "./FileViewerPane";
-import { TabPane } from "./TabPane";
+
+// Lazy-load the heavy pane implementations so their large dependency subtrees
+// (CodeMirror, xterm, shiki, etc.) are not pulled onto the worktree's
+// first-paint critical path. Only the pane types actually present in the
+// active layout are loaded; the mosaic shell and tab strip paint immediately.
+const BrowserPane = lazy(() =>
+	import("./BrowserPane").then((m) => ({ default: m.BrowserPane })),
+);
+const ChatPane = lazy(() =>
+	import("./ChatPane").then((m) => ({ default: m.ChatPane })),
+);
+const CommentPane = lazy(() =>
+	import("./CommentPane").then((m) => ({ default: m.CommentPane })),
+);
+const DevToolsPane = lazy(() =>
+	import("./DevToolsPane").then((m) => ({ default: m.DevToolsPane })),
+);
+const FileViewerPane = lazy(() =>
+	import("./FileViewerPane").then((m) => ({ default: m.FileViewerPane })),
+);
+const TabPane = lazy(() =>
+	import("./TabPane").then((m) => ({ default: m.TabPane })),
+);
 
 export const MOSAIC_ID = "superset-mosaic";
+
+function PaneLoadingFallback() {
+	return (
+		<div className="w-full h-full flex items-center justify-center text-muted-foreground">
+			<LuLoader className="size-4 animate-spin" />
+		</div>
+	);
+}
 
 interface TabViewProps {
 	tab: Tab;
@@ -181,27 +207,100 @@ export function TabView({ tab }: TabViewProps) {
 					);
 				}
 				return (
-					<FileViewerPane
-						paneId={paneId}
-						path={path}
-						tabId={tab.id}
-						worktreePath={worktreePath}
-						splitPaneAuto={splitPaneAuto}
-						splitPaneHorizontal={splitPaneHorizontal}
-						splitPaneVertical={splitPaneVertical}
-						removePane={removePane}
-						setFocusedPane={setFocusedPane}
-						availableTabs={workspaceTabs}
-						onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
-						onMoveToNewTab={() => movePaneToNewTab(paneId)}
-					/>
+					<Suspense fallback={<PaneLoadingFallback />}>
+						<FileViewerPane
+							paneId={paneId}
+							path={path}
+							tabId={tab.id}
+							worktreePath={worktreePath}
+							splitPaneAuto={splitPaneAuto}
+							splitPaneHorizontal={splitPaneHorizontal}
+							splitPaneVertical={splitPaneVertical}
+							removePane={removePane}
+							setFocusedPane={setFocusedPane}
+							availableTabs={workspaceTabs}
+							onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
+							onMoveToNewTab={() => movePaneToNewTab(paneId)}
+						/>
+					</Suspense>
 				);
 			}
 
 			// Route chat panes to ChatPane component
 			if (paneInfo.type === "chat") {
 				return (
-					<ChatPane
+					<Suspense fallback={<PaneLoadingFallback />}>
+						<ChatPane
+							paneId={paneId}
+							path={path}
+							tabId={tab.id}
+							workspaceId={tab.workspaceId}
+							splitPaneAuto={splitPaneAuto}
+							splitPaneHorizontal={splitPaneHorizontal}
+							splitPaneVertical={splitPaneVertical}
+							removePane={removePane}
+							setFocusedPane={setFocusedPane}
+							availableTabs={workspaceTabs}
+							onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
+							onMoveToNewTab={() => movePaneToNewTab(paneId)}
+						/>
+					</Suspense>
+				);
+			}
+
+			// Route browser panes to BrowserPane component
+			if (paneInfo.type === "webview") {
+				return (
+					<Suspense fallback={<PaneLoadingFallback />}>
+						<BrowserPane
+							paneId={paneId}
+							path={path}
+							tabId={tab.id}
+							splitPaneAuto={splitPaneAuto}
+							removePane={removePane}
+							setFocusedPane={setFocusedPane}
+						/>
+					</Suspense>
+				);
+			}
+
+			// Route devtools panes
+			if (paneInfo.type === "devtools" && paneInfo.devtools) {
+				return (
+					<Suspense fallback={<PaneLoadingFallback />}>
+						<DevToolsPane
+							paneId={paneId}
+							path={path}
+							tabId={tab.id}
+							targetPaneId={paneInfo.devtools.targetPaneId}
+							splitPaneAuto={splitPaneAuto}
+							removePane={removePane}
+							setFocusedPane={setFocusedPane}
+						/>
+					</Suspense>
+				);
+			}
+
+			// Route comment panes
+			if (paneInfo.type === "comment") {
+				return (
+					<Suspense fallback={<PaneLoadingFallback />}>
+						<CommentPane
+							paneId={paneId}
+							path={path}
+							tabId={tab.id}
+							splitPaneAuto={splitPaneAuto}
+							removePane={removePane}
+							setFocusedPane={setFocusedPane}
+						/>
+					</Suspense>
+				);
+			}
+
+			// Default: terminal panes
+			return (
+				<Suspense fallback={<PaneLoadingFallback />}>
+					<TabPane
 						paneId={paneId}
 						path={path}
 						tabId={tab.id}
@@ -215,68 +314,7 @@ export function TabView({ tab }: TabViewProps) {
 						onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
 						onMoveToNewTab={() => movePaneToNewTab(paneId)}
 					/>
-				);
-			}
-
-			// Route browser panes to BrowserPane component
-			if (paneInfo.type === "webview") {
-				return (
-					<BrowserPane
-						paneId={paneId}
-						path={path}
-						tabId={tab.id}
-						splitPaneAuto={splitPaneAuto}
-						removePane={removePane}
-						setFocusedPane={setFocusedPane}
-					/>
-				);
-			}
-
-			// Route devtools panes
-			if (paneInfo.type === "devtools" && paneInfo.devtools) {
-				return (
-					<DevToolsPane
-						paneId={paneId}
-						path={path}
-						tabId={tab.id}
-						targetPaneId={paneInfo.devtools.targetPaneId}
-						splitPaneAuto={splitPaneAuto}
-						removePane={removePane}
-						setFocusedPane={setFocusedPane}
-					/>
-				);
-			}
-
-			// Route comment panes
-			if (paneInfo.type === "comment") {
-				return (
-					<CommentPane
-						paneId={paneId}
-						path={path}
-						tabId={tab.id}
-						splitPaneAuto={splitPaneAuto}
-						removePane={removePane}
-						setFocusedPane={setFocusedPane}
-					/>
-				);
-			}
-
-			// Default: terminal panes
-			return (
-				<TabPane
-					paneId={paneId}
-					path={path}
-					tabId={tab.id}
-					workspaceId={tab.workspaceId}
-					splitPaneAuto={splitPaneAuto}
-					splitPaneHorizontal={splitPaneHorizontal}
-					splitPaneVertical={splitPaneVertical}
-					removePane={removePane}
-					setFocusedPane={setFocusedPane}
-					availableTabs={workspaceTabs}
-					onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
-					onMoveToNewTab={() => movePaneToNewTab(paneId)}
-				/>
+				</Suspense>
 			);
 		},
 		[

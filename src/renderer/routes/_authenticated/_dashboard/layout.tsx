@@ -6,10 +6,11 @@ import {
 	useMatchRoute,
 	useNavigate,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CommandPaletteHost } from "renderer/commandPalette";
 import { useIsV2CloudEnabled } from "renderer/hooks/useIsV2CloudEnabled";
 import { useHotkey } from "renderer/hotkeys";
+import { dismissBootSplash } from "renderer/lib/boot-splash";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { DashboardSidebar } from "renderer/routes/_authenticated/_dashboard/components/DashboardSidebar";
 import { DashboardSidebarDeleteDialog } from "renderer/routes/_authenticated/_dashboard/components/DashboardSidebar/components/DashboardSidebarDeleteDialog";
@@ -72,6 +73,15 @@ function DashboardLayout() {
 		v2WorkspaceMatch !== false ? v2WorkspaceMatch.workspaceId : null;
 	const onV1WorkspaceRoute = currentWorkspaceMatch !== false;
 	const onV2WorkspaceRoute = v2WorkspaceMatch !== false;
+	// Dismiss the boot splash for non-worktree routes as soon as the dashboard
+	// shell renders. The v1 worktree route keeps the splash up until its page
+	// signals the worktree is ready (see the workspace page), so the user never
+	// sees a blank window before the worktree renders.
+	useEffect(() => {
+		if (!onV1WorkspaceRoute) {
+			dismissBootSplash();
+		}
+	}, [onV1WorkspaceRoute]);
 	const versionMismatch =
 		(isV2CloudEnabled && onV1WorkspaceRoute) ||
 		(!isV2CloudEnabled && onV2WorkspaceRoute);
