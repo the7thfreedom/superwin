@@ -1,4 +1,6 @@
 import { EventEmitter } from "node:events";
+import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 // Wraps native-keymap for the renderer (mirrors VSCode's
 // keyboardLayoutMainService). Lazy-loads on first read so the native module
@@ -33,16 +35,43 @@ let initialized = false;
 type NativeKeymapModule = typeof import("native-keymap");
 
 let nativeKeymap: NativeKeymapModule | null = null;
+let nativeProbed = false;
 
 function loadNative(): NativeKeymapModule | null {
-	if (nativeKeymap) return nativeKeymap;
+	if (nativeProbed) return nativeKeymap;
+	nativeProbed = true;
 	try {
+		// `require("native-keymap")` only loads the JS shim; the native `.node`
+		// binding is loaded lazily on the first accessor call. On Electron 40 the
+		// binding is not built (native-keymap@3.x won't compile against this ABI).
+		// Crucially, native-keymap swallows the load failure internally — each
+		// accessor wraps the call in try/catch and `console.error`s the error
+		// before returning a fallback ([] / null), so it never throws and a
+		// JS-level try/catch here cannot suppress the noise. Every accessor would
+		// log once per call (a MODULE_NOT_FOUND plus null-deref TypeErrors leaking
+		// out of a tRPC subscription's ReadableStream `start()`). Detect the
+		// missing binary up front by probing the filesystem so we never call into
+		// the module when it can't work.
+		const modDir = dirname(require.resolve("native-keymap"));
+		const hasBinary =
+			existsSync(join(modDir, "build", "Release", "keymapping.node")) ||
+			existsSync(join(modDir, "build", "Debug", "keymapping.node"));
+		if (!hasBinary) {
+			console.warn(
+				"[keyboardLayout] native-keymap binding not built; using US-ANSI fallback",
+			);
+			nativeKeymap = null;
+			return null;
+		}
 		nativeKeymap = require("native-keymap") as NativeKeymapModule;
-		return nativeKeymap;
 	} catch (err) {
-		console.error("[keyboardLayout] failed to load native-keymap:", err);
-		return null;
+		console.warn(
+			"[keyboardLayout] native-keymap unavailable; using US-ANSI fallback:",
+			err instanceof Error ? err.message : err,
+		);
+		nativeKeymap = null;
 	}
+	return nativeKeymap;
 }
 
 function read(): KeyboardLayoutData {
