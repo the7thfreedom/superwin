@@ -19,6 +19,7 @@ import { createTerminalAgentDefinition } from "./agent-definition";
 import {
 	buildPromptCommandString,
 	buildPromptFileCommandString,
+	type CommandShell,
 	type PromptTransport,
 } from "./agent-prompt-launch";
 import {
@@ -433,10 +434,12 @@ export function buildPromptCommandFromAgentConfig({
 	prompt,
 	randomId,
 	config,
+	shell,
 }: {
 	prompt: string;
 	randomId: string;
 	config: TerminalResolvedAgentConfig;
+	shell?: CommandShell;
 }): string | null {
 	const promptCommand = config.promptCommand.trim() || config.command.trim();
 	if (!promptCommand) return null;
@@ -447,15 +450,18 @@ export function buildPromptCommandFromAgentConfig({
 		command: promptCommand,
 		suffix: config.promptCommandSuffix?.trim() || undefined,
 		transport: config.promptTransport,
+		shell,
 	});
 }
 
 export function buildFileCommandFromAgentConfig({
 	filePath,
 	config,
+	shell,
 }: {
 	filePath: string;
 	config: TerminalResolvedAgentConfig;
+	shell?: CommandShell;
 }): string | null {
 	const promptCommand = config.promptCommand.trim() || config.command.trim();
 	if (!promptCommand) return null;
@@ -465,6 +471,7 @@ export function buildFileCommandFromAgentConfig({
 		command: promptCommand,
 		suffix: config.promptCommandSuffix?.trim() || undefined,
 		transport: config.promptTransport,
+		shell,
 	});
 }
 

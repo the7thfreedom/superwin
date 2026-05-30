@@ -687,6 +687,7 @@ function PromptGroupInner({
 				initialFiles: files,
 				taskSlug: firstIssueSlug || undefined,
 				configsById: agentConfigsById,
+				shell: PLATFORM === "windows" ? "powershell" : "posix",
 			});
 		},
 		[agentConfigsById, firstIssueSlug, selectedAgent],

@@ -5,6 +5,7 @@ import {
 	renderTaskPromptTemplate,
 	validateTaskPromptTemplate,
 } from "@superset/shared/agent-settings";
+import { PLATFORM } from "renderer/hotkeys";
 import type { AgentEditableField } from "./agent-card.types";
 
 const SAMPLE_TASK = {
@@ -40,6 +41,7 @@ export function getPreviewTaskCommand(preset: ResolvedAgentConfig): string {
 		buildFileCommandFromAgentConfig({
 			filePath: `.superset/task-${SAMPLE_TASK.slug}.md`,
 			config: preset,
+			shell: PLATFORM === "windows" ? "powershell" : "posix",
 		}) ?? "No prompt-capable command configured."
 	);
 }

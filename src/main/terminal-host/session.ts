@@ -1166,7 +1166,13 @@ export class Session {
 	 */
 	private getDefaultShell(): string {
 		if (process.platform === "win32") {
-			return process.env.COMSPEC || "cmd.exe";
+			// Default to PowerShell, not cmd.exe. Agent launch commands are built
+			// with PowerShell syntax (single-quoted literals / `Get-Content -Raw`)
+			// because cmd.exe understands neither heredocs nor `$(...)`, so a
+			// prompt launched under cmd.exe arrives verbatim instead of executing.
+			// `powershell.exe` (Windows PowerShell 5.1) ships on every Win10/11.
+			// Honor SUPERSET_DEFAULT_SHELL for users who prefer another shell.
+			return process.env.SUPERSET_DEFAULT_SHELL || "powershell.exe";
 		}
 		return process.env.SHELL || "/bin/zsh";
 	}

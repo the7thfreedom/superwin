@@ -1,5 +1,6 @@
 import type { TaskInput } from "./agent-command";
 import type { AgentLaunchRequest, AgentLaunchSource } from "./agent-launch";
+import type { CommandShell } from "./agent-prompt-launch";
 import {
 	type AgentDefinitionId,
 	buildFileCommandFromAgentConfig,
@@ -42,6 +43,7 @@ export function buildPromptAgentLaunchRequest({
 	initialFiles,
 	taskSlug,
 	configsById,
+	shell,
 }: {
 	workspaceId: string;
 	source: AgentLaunchSource;
@@ -54,6 +56,7 @@ export function buildPromptAgentLaunchRequest({
 	}>;
 	taskSlug?: string;
 	configsById: ReadonlyMap<AgentDefinitionId, ResolvedAgentConfig>;
+	shell?: CommandShell;
 }): AgentLaunchRequest | null {
 	if (selectedAgent === "none") return null;
 
@@ -136,6 +139,7 @@ export function buildPromptAgentLaunchRequest({
 				prompt: enhancedPrompt,
 				randomId: crypto.randomUUID(),
 				config,
+				shell,
 			})
 		: getCommandFromAgentConfig(config);
 
@@ -161,6 +165,7 @@ export function buildTaskAgentLaunchRequest({
 	task,
 	autoRun,
 	configsById,
+	shell,
 }: {
 	workspaceId: string;
 	source: AgentLaunchSource;
@@ -168,6 +173,7 @@ export function buildTaskAgentLaunchRequest({
 	task: TaskInput;
 	autoRun: boolean;
 	configsById: ReadonlyMap<AgentDefinitionId, ResolvedAgentConfig>;
+	shell?: CommandShell;
 }): AgentLaunchRequest | null {
 	if (selectedAgent === "none") return null;
 
@@ -201,6 +207,7 @@ export function buildTaskAgentLaunchRequest({
 	const command = buildFileCommandFromAgentConfig({
 		filePath: `.superset/${taskPromptFileName}`,
 		config: terminalConfig,
+		shell,
 	});
 
 	if (!command) {
