@@ -1,14 +1,21 @@
 // Stub: cloud collections provider removed. Local-only empty Collections.
-import { createCollection, localOnlyCollectionOptions } from "@tanstack/db";
+import { type Collection, createCollection, localOnlyCollectionOptions } from "@tanstack/db";
 import type { ReactNode } from "react";
 
-export type AppCollections = any;
+// Permissive row shape. The cloud-strip removed the per-collection schemas, so
+// we can no longer infer concrete row types. Using an index-signature row
+// (instead of `any`/`object`) keeps the TanStack DB query builder's ref-proxy
+// property access (`.select`/`.where` callbacks) type-checkable: `keyof` of an
+// index signature is `string | number`, so arbitrary field access resolves to
+// `unknown` rather than failing with TS2339.
+type CollectionRow = Record<string, any>;
+type StubCollection = Collection<CollectionRow>;
 
-const makeCollection = (id: string): any =>
+const makeCollection = (id: string): StubCollection =>
 	createCollection(
-		localOnlyCollectionOptions<any>({
+		localOnlyCollectionOptions<CollectionRow>({
 			id,
-			getKey: (item: any) => item?.id ?? "",
+			getKey: (item) => (item as { id?: string })?.id ?? "",
 		}),
 	);
 
@@ -35,18 +42,24 @@ const COLLECTION_NAMES = [
 	"workspaces",
 ] as const;
 
-let cached: any = null;
-const buildCollections = (): any => {
+type CollectionName = (typeof COLLECTION_NAMES)[number];
+
+export type AppCollections = Record<CollectionName, StubCollection> & {
+	isLoading: boolean;
+};
+
+let cached: AppCollections | null = null;
+const buildCollections = (): AppCollections => {
 	if (cached) return cached;
-	cached = {};
+	const next = { isLoading: false } as AppCollections;
 	for (const name of COLLECTION_NAMES) {
-		cached[name] = makeCollection(`stub-${name}`);
+		next[name] = makeCollection(`stub-${name}`);
 	}
-	cached.isLoading = false;
+	cached = next;
 	return cached;
 };
 
-export const useCollections: any = (): any => buildCollections();
+export const useCollections = (): AppCollections => buildCollections();
 
 export const CollectionsProvider = ({ children }: { children?: ReactNode }) =>
-	children as any;
+	children as ReactNode;
