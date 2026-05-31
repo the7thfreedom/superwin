@@ -33,6 +33,7 @@ All trademarks and product names belong to their respective owners.
 | This fork's license | Elastic License 2.0 (ELv2) — same as upstream |
 | Sync strategy | Periodic rebase from upstream `main` |
 | Affiliation | None. This is an independent community port. |
+| Upstream notified | Yes — [superset-sh/superset#5011](https://github.com/superset-sh/superset/issues/5011) |
 
 If you are the upstream maintainer and have concerns about this project, please [open an issue](../../issues) — happy to align.
 
