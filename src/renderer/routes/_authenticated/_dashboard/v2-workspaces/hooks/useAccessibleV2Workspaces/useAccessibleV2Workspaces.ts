@@ -221,7 +221,7 @@ export function useAccessibleV2Workspaces(
 	const collections = useCollections();
 	const { machineId } = useLocalHostService();
 
-	const activeOrganizationId = env.SKIP_ENV_VALIDATION
+	const activeOrganizationId = env.IS_LOCAL_ONLY
 		? MOCK_ORG_ID
 		: (session?.session?.activeOrganizationId ?? null);
 	const currentUserId = session?.user?.id ?? null;

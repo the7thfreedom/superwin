@@ -27,8 +27,10 @@ function WorkspaceIndexPage() {
 		if (isLoading || !workspaces) return;
 
 		if (allWorkspaces.length === 0) {
-			// Redirect to clean onboarding screen (no sidebar/topbar)
-			navigate({ to: "/welcome", replace: true });
+			// No workspaces yet: land on the projects list, which has the sidebar
+			// "Add repository" entry points. (Upstream behavior; the fork's
+			// /welcome onboarding route was never created.)
+			navigate({ to: "/workspaces", replace: true });
 			return;
 		}
 

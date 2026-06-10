@@ -1317,11 +1317,33 @@ export const SETTINGS_ITEMS: SettingsItem[] = [
 	},
 ];
 
+/**
+ * Settings sections whose route files were removed by the cloud-strip (auth,
+ * org management, billing, etc. are stubbed in this local-only fork). Filtered
+ * here — the single registry chokepoint — so the sidebar, search counts, the
+ * search auto-navigation, and the command palette all hide them consistently
+ * without deleting upstream's item definitions (smaller rebase surface).
+ */
+export const REMOVED_SETTINGS_SECTIONS: ReadonlySet<SettingsSection> = new Set([
+	"account",
+	"organization",
+	"teams",
+	"integrations",
+	"billing",
+	"apikeys",
+	"security",
+	"permissions",
+]);
+
+const ACTIVE_SETTINGS_ITEMS = SETTINGS_ITEMS.filter(
+	(item) => !REMOVED_SETTINGS_SECTIONS.has(item.section),
+);
+
 export function searchSettings(query: string): SettingsItem[] {
-	if (!query.trim()) return SETTINGS_ITEMS;
+	if (!query.trim()) return ACTIVE_SETTINGS_ITEMS;
 
 	const q = query.toLowerCase();
-	return SETTINGS_ITEMS.filter(
+	return ACTIVE_SETTINGS_ITEMS.filter(
 		(item) =>
 			item.title.toLowerCase().includes(q) ||
 			item.description.toLowerCase().includes(q) ||
@@ -1404,7 +1426,7 @@ export function getAllowedSectionsForVariant(
 	isV2: boolean,
 ): Set<SettingsSection> {
 	const sections = new Set<SettingsSection>();
-	for (const item of SETTINGS_ITEMS) {
+	for (const item of ACTIVE_SETTINGS_ITEMS) {
 		if (isItemAllowedForVariant(item.id, isV2)) sections.add(item.section);
 	}
 	return sections;

@@ -17,7 +17,7 @@ function ProjectsIndexPage() {
 	const { data: session } = authClient.useSession();
 	const navigate = useNavigate();
 
-	const activeOrganizationId = env.SKIP_ENV_VALIDATION
+	const activeOrganizationId = env.IS_LOCAL_ONLY
 		? MOCK_ORG_ID
 		: (session?.session?.activeOrganizationId ?? null);
 

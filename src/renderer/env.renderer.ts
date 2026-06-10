@@ -54,9 +54,20 @@ const rawEnv = {
 const SKIP_ENV_VALIDATION =
 	process.env.NODE_ENV === "development" && !!process.env.SKIP_ENV_VALIDATION;
 
+// This fork is permanently local-only: cloud/auth are stubbed (see
+// lib/auth-client.ts), so authClient.useSession() can never produce a real
+// session. Consumers that branch between mock local values and a session
+// (org IDs, local chat bootstrap) read env.IS_LOCAL_ONLY so they take the
+// local path in packaged production builds too. Kept separate from
+// SKIP_ENV_VALIDATION (which keeps its dev-only meaning) so upstream code
+// gaining new SKIP_ENV_VALIDATION consumers does not silently inherit
+// local-only semantics in production after a rebase.
+const IS_LOCAL_ONLY = true;
+
 export const env = {
 	...(SKIP_ENV_VALIDATION
 		? (rawEnv as z.infer<typeof envSchema>)
 		: envSchema.parse(rawEnv)),
 	SKIP_ENV_VALIDATION,
+	IS_LOCAL_ONLY,
 };

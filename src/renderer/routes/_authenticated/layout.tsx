@@ -15,6 +15,7 @@ import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { showWorkspaceAutoNameWarningToast } from "renderer/lib/workspaces/showWorkspaceAutoNameWarningToast";
 import { InitGitDialog } from "renderer/react-query/projects/InitGitDialog";
+import { AddRepositoryModals } from "renderer/routes/_authenticated/_dashboard/components/AddRepositoryModals";
 import { DashboardNewWorkspaceModal } from "renderer/routes/_authenticated/components/DashboardNewWorkspaceModal";
 import { V1ImportModal } from "renderer/routes/_authenticated/components/V1ImportModal";
 import { WorkspaceInitEffects } from "renderer/screens/main/components/WorkspaceInitEffects";
@@ -23,7 +24,10 @@ import { useTabsStore } from "renderer/stores/tabs/store";
 import { useAgentHookListener } from "renderer/stores/tabs/useAgentHookListener";
 import { setPaneWorkspaceRunState } from "renderer/stores/tabs/workspace-run";
 import { useWorkspaceInitStore } from "renderer/stores/workspace-init";
-import { NOTIFICATION_EVENTS } from "shared/constants";
+import {
+	type DEFAULT_SETTINGS_PATH,
+	NOTIFICATION_EVENTS,
+} from "shared/constants";
 import { AgentHooks } from "./components/AgentHooks";
 import { FileMenuListener } from "./components/FileMenuListener";
 import { GlobalBrowserLifecycle } from "./components/GlobalBrowserLifecycle";
@@ -130,8 +134,12 @@ function AuthenticatedLayout() {
 	electronTrpc.menu.subscribe.useSubscription(undefined, {
 		onData: (event) => {
 			if (event.type === "open-settings") {
-				const section = event.data.section || "account";
-				navigate({ to: `/settings/${section}` as "/settings/account" });
+				// "appearance" default: /settings/account was removed by the
+				// cloud-strip (auth is stubbed in this fork).
+				const section = event.data.section || "appearance";
+				navigate({
+					to: `/settings/${section}` as typeof DEFAULT_SETTINGS_PATH,
+				});
 			} else if (event.type === "open-workspace") {
 				navigate({ to: `/workspace/${event.data.workspaceId}` });
 			}
@@ -153,6 +161,10 @@ function AuthenticatedLayout() {
 							<V2NotificationController />
 							<Outlet />
 							<V1ImportModal />
+							{/* Mounted here (not in _dashboard) so openNewProject() has a
+							    host on every route its openers can fire from, e.g. the
+							    new-workspace modal surviving a navigation to /settings. */}
+							<AddRepositoryModals />
 							<WorkspaceInitEffects />
 							{isV2CloudEnabled ? (
 								<DashboardNewWorkspaceModal />
