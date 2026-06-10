@@ -35,8 +35,12 @@ export const NOTIFICATION_EVENTS = {
 	TERMINAL_EXIT: "terminal-exit",
 } as const;
 
-// Development/testing mock values (used when SKIP_ENV_VALIDATION is set)
+// Local-only mock values (used when env.IS_LOCAL_ONLY is set - always, in this fork)
 export const MOCK_ORG_ID = "mock-org-id";
+
+// Default settings destination. /settings/account (upstream's default) was
+// removed by the cloud-strip; every settings entry point should use this.
+export const DEFAULT_SETTINGS_PATH = "/settings/appearance" as const;
 
 // Terminal defaults
 export const DEFAULT_TERMINAL_SCROLLBACK = 5000;

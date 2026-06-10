@@ -28,7 +28,7 @@ import {
 	MAX_WORKSPACE_SIDEBAR_WIDTH,
 	useWorkspaceSidebarStore,
 } from "renderer/stores/workspace-sidebar-state";
-import { AddRepositoryModals } from "./components/AddRepositoryModals";
+import { DEFAULT_SETTINGS_PATH } from "shared/constants";
 import { CrossVersionMismatchState } from "./components/CrossVersionMismatchState";
 import { TopBar } from "./components/TopBar";
 
@@ -115,7 +115,7 @@ function DashboardLayout() {
 	} = useWorkspaceSidebarStore();
 
 	// Global hotkeys for dashboard
-	useHotkey("OPEN_SETTINGS", () => navigate({ to: "/settings/account" }));
+	useHotkey("OPEN_SETTINGS", () => navigate({ to: DEFAULT_SETTINGS_PATH }));
 	useHotkey("SHOW_HOTKEYS", () => navigate({ to: "/settings/keyboard" }));
 	useHotkey("TOGGLE_WORKSPACE_SIDEBAR", () => {
 		if (!isWorkspaceSidebarOpen) {
@@ -213,7 +213,6 @@ function DashboardLayout() {
 				</div>
 			</div>
 			<div id="workspace-right-sidebar-slot" className="flex h-full shrink-0" />
-			<AddRepositoryModals />
 			{deleteTarget?.version === "v1" && (
 				<DeleteWorkspaceDialog
 					workspaceId={deleteTarget.workspaceId}

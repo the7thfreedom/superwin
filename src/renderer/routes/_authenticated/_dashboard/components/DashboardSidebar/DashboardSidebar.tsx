@@ -28,6 +28,7 @@ import { V2AvailableBanner } from "renderer/components/V2AvailableBanner";
 import { useHotkeyDisplay } from "renderer/hotkeys";
 import { useDashboardSidebarState } from "renderer/routes/_authenticated/hooks/useDashboardSidebarState";
 import { useLocalHostService } from "renderer/routes/_authenticated/providers/LocalHostServiceProvider";
+import { DEFAULT_SETTINGS_PATH } from "shared/constants";
 import { DashboardSidebarHeader } from "./components/DashboardSidebarHeader";
 import { DashboardSidebarHelpMenu } from "./components/DashboardSidebarHelpMenu";
 import { DashboardSidebarHoverCardOverlay } from "./components/DashboardSidebarHoverCardOverlay";
@@ -253,7 +254,7 @@ export function DashboardSidebar({
 										<button
 											type="button"
 											aria-label="Settings"
-											onClick={() => navigate({ to: "/settings/account" })}
+											onClick={() => navigate({ to: DEFAULT_SETTINGS_PATH })}
 											className={cn(
 												"flex size-8 items-center justify-center rounded-md transition-colors",
 												isSettingsOpen
@@ -269,7 +270,7 @@ export function DashboardSidebar({
 							) : (
 								<button
 									type="button"
-									onClick={() => navigate({ to: "/settings/account" })}
+									onClick={() => navigate({ to: DEFAULT_SETTINGS_PATH })}
 									className={cn(
 										"group flex flex-1 min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium transition-colors",
 										isSettingsOpen

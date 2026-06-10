@@ -21,6 +21,8 @@ import {
 	UsersIcon,
 	WrenchIcon,
 } from "lucide-react";
+import { REMOVED_SETTINGS_SECTIONS } from "renderer/routes/_authenticated/settings/utils/settings-search";
+import type { SettingsSection } from "renderer/stores/settings-state";
 import type { Command } from "../../core/types";
 
 interface SettingsTab {
@@ -150,4 +152,8 @@ function tabToCommand(tab: SettingsTab): Command {
 	};
 }
 
-export const settingsTabCommands = TABS.map(tabToCommand);
+// Tab ids match SettingsSection tokens except "api-keys" -> "apikeys".
+export const settingsTabCommands = TABS.filter(
+	(tab) =>
+		!REMOVED_SETTINGS_SECTIONS.has(tab.id.replace("-", "") as SettingsSection),
+).map(tabToCommand);

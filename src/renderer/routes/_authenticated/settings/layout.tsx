@@ -13,11 +13,13 @@ import {
 	useSettingsOriginRoute,
 	useSettingsSearchQuery,
 } from "renderer/stores/settings-state";
+import { DEFAULT_SETTINGS_PATH } from "shared/constants";
 import { NavigationControls } from "../_dashboard/components/NavigationControls";
 import { SearchResultsBanner } from "./components/SearchResultsBanner";
 import { SettingsSidebar } from "./components/SettingsSidebar";
 import {
 	getMatchCountBySection,
+	REMOVED_SETTINGS_SECTIONS,
 	searchSettings,
 } from "./utils/settings-search";
 
@@ -68,7 +70,9 @@ function getSectionFromPath(pathname: string): SettingsSection | null {
 function getPathFromSection(section: SettingsSection): string {
 	switch (section) {
 		case "account":
-			return "/settings/account";
+			// /settings/account was removed by the cloud-strip; appearance is the
+			// first surviving Personal section.
+			return DEFAULT_SETTINGS_PATH;
 		case "organization":
 			return "/settings/organization";
 		case "teams":
@@ -98,7 +102,7 @@ function getPathFromSection(section: SettingsSection): string {
 		case "hosts":
 			return "/settings/hosts";
 		default:
-			return "/settings/account";
+			return DEFAULT_SETTINGS_PATH;
 	}
 }
 
@@ -129,9 +133,9 @@ function SettingsLayout() {
 		const currentHasMatches = (matchCounts[currentSection] ?? 0) > 0;
 
 		if (!currentHasMatches) {
-			const firstMatch = SECTION_ORDER.find(
-				(section) => (matchCounts[section] ?? 0) > 0,
-			);
+			const firstMatch = SECTION_ORDER.filter(
+				(section) => !REMOVED_SETTINGS_SECTIONS.has(section),
+			).find((section) => (matchCounts[section] ?? 0) > 0);
 			if (firstMatch) {
 				navigate({ to: getPathFromSection(firstMatch), replace: true });
 			}
