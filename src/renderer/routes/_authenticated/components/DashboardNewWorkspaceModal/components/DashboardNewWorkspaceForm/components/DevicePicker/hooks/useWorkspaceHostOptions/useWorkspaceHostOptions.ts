@@ -26,7 +26,7 @@ export function useWorkspaceHostOptions(): UseWorkspaceHostOptionsResult {
 	const collections = useCollections();
 	const { machineId, activeHostUrl } = useLocalHostService();
 
-	const activeOrganizationId = env.SKIP_ENV_VALIDATION
+	const activeOrganizationId = env.IS_LOCAL_ONLY
 		? MOCK_ORG_ID
 		: (session?.session?.activeOrganizationId ?? null);
 	const currentUserId = session?.user?.id ?? null;

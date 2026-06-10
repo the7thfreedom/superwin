@@ -40,35 +40,33 @@ export const DEV_CHAT_MODELS: ModelOption[] = [
 	},
 ];
 
-export function isDesktopChatDevMode(
-	skipEnvValidation = env.SKIP_ENV_VALIDATION,
-): boolean {
-	return skipEnvValidation;
+export function isDesktopChatDevMode(isLocalOnly = env.IS_LOCAL_ONLY): boolean {
+	return isLocalOnly;
 }
 
 export function resolveDesktopChatOrganizationId(
 	activeOrganizationId: string | null | undefined,
-	skipEnvValidation = env.SKIP_ENV_VALIDATION,
+	isLocalOnly = env.IS_LOCAL_ONLY,
 ): string | null {
-	if (skipEnvValidation) return MOCK_ORG_ID;
+	if (isLocalOnly) return MOCK_ORG_ID;
 	return activeOrganizationId ?? null;
 }
 
 export function isDesktopChatSessionReady({
 	sessionId,
 	hasPersistedSession,
-	skipEnvValidation = env.SKIP_ENV_VALIDATION,
+	isLocalOnly = env.IS_LOCAL_ONLY,
 }: {
 	sessionId: string | null;
 	hasPersistedSession: boolean;
-	skipEnvValidation?: boolean;
+	isLocalOnly?: boolean;
 }): boolean {
-	if (skipEnvValidation) return Boolean(sessionId);
+	if (isLocalOnly) return Boolean(sessionId);
 	return hasPersistedSession;
 }
 
 export function getDesktopChatModelOptions(
-	skipEnvValidation = env.SKIP_ENV_VALIDATION,
+	isLocalOnly = env.IS_LOCAL_ONLY,
 ): ModelOption[] {
-	return skipEnvValidation ? DEV_CHAT_MODELS : [];
+	return isLocalOnly ? DEV_CHAT_MODELS : [];
 }

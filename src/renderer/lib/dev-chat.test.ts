@@ -24,14 +24,14 @@ describe("dev chat helpers", () => {
 			isDesktopChatSessionReady({
 				sessionId: "session-123",
 				hasPersistedSession: false,
-				skipEnvValidation: true,
+				isLocalOnly: true,
 			}),
 		).toBe(true);
 		expect(
 			isDesktopChatSessionReady({
 				sessionId: null,
 				hasPersistedSession: false,
-				skipEnvValidation: true,
+				isLocalOnly: true,
 			}),
 		).toBe(false);
 	});
