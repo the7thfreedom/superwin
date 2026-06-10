@@ -485,7 +485,27 @@ function copyParcelWatcherPlatformPackages(nodeModulesDir: string): void {
 function copyDuckdbPlatformPackages(nodeModulesDir: string): void {
 	const nodeBindingsPath = join(nodeModulesDir, "@duckdb", "node-bindings");
 	const nodeBindingsPkgJsonPath = join(nodeBindingsPath, "package.json");
-	if (!existsSync(nodeBindingsPkgJsonPath)) return;
+	if (!existsSync(nodeBindingsPkgJsonPath)) {
+		// Bun's isolated linker keeps transitive deps (here via @mastra/duckdb) in
+		// the store only, so @duckdb/* may have no workspace-root copy. Materialize
+		// node-api and node-bindings first: electron-builder's dependency
+		// collection ships these workspace-root copies, and validate:native-runtime
+		// checks the platform binding derived from them.
+		for (const moduleName of ["@duckdb/node-api", "@duckdb/node-bindings"]) {
+			// A torn earlier copy can leave the directory without package.json,
+			// which copyModuleIfSymlink treats as already materialized; remove it
+			// so the copy is retried instead of wedging every later build.
+			const moduleDir = join(nodeModulesDir, moduleName);
+			if (
+				existsSync(moduleDir) &&
+				!existsSync(join(moduleDir, "package.json"))
+			) {
+				rmSync(moduleDir, { recursive: true, force: true });
+			}
+			copyModuleIfSymlink(nodeModulesDir, moduleName, false);
+		}
+		if (!existsSync(nodeBindingsPkgJsonPath)) return;
+	}
 
 	type DuckdbBindingsPackageJson = {
 		optionalDependencies?: Record<string, string>;

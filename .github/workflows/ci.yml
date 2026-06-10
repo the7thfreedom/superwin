@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
-        run: bun install --frozen --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Sherif
         run: bunx sherif
@@ -52,7 +52,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
-        run: bun install --frozen --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Lint
         run: bun run lint
@@ -77,7 +77,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
-        run: bun install --frozen --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Install Linux native build deps
         run: sudo apt-get update && sudo apt-get install -y libx11-dev libxkbfile-dev
@@ -110,7 +110,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
-        run: bun install --frozen --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Typecheck
         run: bun run typecheck
@@ -135,7 +135,7 @@ jobs:
           key: ${{ runner.os }}-bun-${{ steps.setup-bun.outputs.bun-revision }}-${{ hashFiles('bun.lock') }}
 
       - name: Install dependencies
-        run: bun install --frozen --ignore-scripts
+        run: bun install --frozen-lockfile --ignore-scripts
 
       - name: Install Linux native build deps
         run: sudo apt-get update && sudo apt-get install -y libx11-dev libxkbfile-dev
