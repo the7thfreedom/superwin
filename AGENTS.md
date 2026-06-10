@@ -47,7 +47,7 @@ These are the canonical targets for Windows adaptation work. Always update `docs
 
 | Path | What to change |
 |------|----------------|
-| `apps/desktop/package.json` | Add `"build:win"` script targeting Electron-builder Windows output |
+| `package.json` | Keep the `build` script (electron-builder NSIS output in `release/`) working on Windows |
 | `README.md` | Keep Windows build instructions accurate as code evolves |
 | `docs/windows-changes.md` | **Always update this file** when making any Windows-specific patch — log the path, what changed, and why |
 
@@ -127,7 +127,7 @@ bun test                   # Run tests
 bun build                  # Build all packages
 
 # Windows desktop build
-bun run build:win          # Build Windows installer (nsis/msi via Electron-builder)
+bun run build              # Build Windows installer (nsis via electron-builder, output in release/)
 
 # Code Quality
 bun run lint               # Check lint (exits non-zero on warnings too)

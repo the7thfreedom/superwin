@@ -46,6 +46,8 @@ If you are the upstream maintainer and have concerns about this project, please 
 | Version Control | Git for Windows 2.40+ |
 | GitHub CLI | gh (optional) |
 | Shell | PowerShell 7+ recommended |
+| C++ Toolchain | Visual Studio 2022 (or Build Tools) with the **Desktop development with C++** workload; the **MSVC Spectre-mitigated libs** component is additionally needed for `node-pty` |
+| Symlink support | Windows **Developer Mode**, so electron-builder can extract its symlink-containing winCodeSign cache (an elevated run also works but recurs on electron-builder upgrades) |
 
 ## Installation
 
@@ -66,8 +68,8 @@ bun install
 # Run dev
 bun run dev
 
-# Build Windows installer
-bun run build:win
+# Build Windows installer (output in release\SuperWin-<version>-x64.exe)
+bun run build
 ```
 
 ## What's Different from Upstream
